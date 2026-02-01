@@ -1,7 +1,10 @@
 #pragma once
 
 #include<cmath>
+#include <vector>
+#include "../State/State.h"
 #include "../Phase/Phase.h"
+#include "../Components/Components.h"
 
 //добавить "прегрузки"
 inline double e_P_ro(double P, double ro, const Phase& ph)
@@ -23,3 +26,4 @@ inline double E(double e, double u)
 {
     return e + (u*u)*0.5;
 };
+
