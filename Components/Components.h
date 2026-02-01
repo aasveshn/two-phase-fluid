@@ -7,8 +7,8 @@ class Components{
 
 public:
 
-    Phase p1;
-    Phase p2;
+    const Phase p1;
+    const Phase p2;
 
     Components(Phase p1, Phase p2);
 
