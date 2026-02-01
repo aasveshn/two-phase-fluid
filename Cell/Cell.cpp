@@ -18,9 +18,3 @@ void Cell::setFaces(const unsigned int (&faces_id)[4])
     faces_ID[3] = faces_id[3];
 }
 
-std::vector<double> Cell::getU()
-{   
-    double a2 = 1 - W.a1;
-    std::cout<<"Cell.getU() not finished yet !!!!!!!!!!!!! \n";
-    return std::vector<double> {W.a1*W.ro1};
-}

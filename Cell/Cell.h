@@ -20,5 +20,4 @@ public:
     Cell(unsigned int ID, const unsigned int (&faces_id)[4]);
 
     void setFaces(const unsigned int (&faces_id)[4]);
-    std::vector<double> getU();
 };
