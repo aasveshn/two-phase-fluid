@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "../State/State.h"
+#include "../States/StateW.h"
 
 class Cell{
 
@@ -14,7 +14,7 @@ private:
     
 public:
 
-    State W;
+    StateW W;
 
     Cell(unsigned int ID);
     Cell(unsigned int ID, const unsigned int (&faces_id)[4]);

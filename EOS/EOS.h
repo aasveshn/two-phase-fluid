@@ -2,7 +2,7 @@
 
 #include<cmath>
 #include <vector>
-#include "../State/State.h"
+#include "../States/StateW.h"
 #include "../Phase/Phase.h"
 #include "../Components/Components.h"
 
