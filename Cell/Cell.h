@@ -7,17 +7,16 @@
 
 class Cell{
 
-private:
-
-    unsigned int ID;
-    int faces_ID[4];
-    
 public:
+
+    const unsigned int ID, i, j;
+    const int faces_ID[4];
+    
 
     StateW W;
 
-    Cell(unsigned int ID);
-    Cell(unsigned int ID, const int (&faces_id)[4]);
+    //Cell(unsigned int ID);
+    Cell(unsigned int id, unsigned int i_index, unsigned int j_index, const int (&faces_id)[4]);
 
-    void setFaces(const  int (&faces_id)[4]);
+    //void setFaces(const  int (&faces_id)[4]);
 };
