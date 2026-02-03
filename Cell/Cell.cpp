@@ -5,7 +5,7 @@
 Cell::Cell(unsigned int id,
            unsigned int i_index,
            unsigned int j_index,
-           const int (&faces_id)[4])
+           const unsigned int (&faces_id)[4])
            : ID(id),
            i(i_index),
            j(j_index),

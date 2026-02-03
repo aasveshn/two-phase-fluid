@@ -10,13 +10,13 @@ class Cell{
 public:
 
     const unsigned int ID, i, j;
-    const int faces_ID[4];
+    const unsigned int faces_ID[4];
     
 
     StateW W;
 
     //Cell(unsigned int ID);
-    Cell(unsigned int id, unsigned int i_index, unsigned int j_index, const int (&faces_id)[4]);
+    Cell(unsigned int id, unsigned int i_index, unsigned int j_index, const unsigned int (&faces_id)[4]);
 
     //void setFaces(const  int (&faces_id)[4]);
 };
