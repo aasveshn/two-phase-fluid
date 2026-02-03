@@ -1,1 +1,49 @@
+#include "Mesh.h"
+#include <iomanip> // Для красивого вывода чисел
 
+
+Mesh::Mesh(std::string filename)
+{
+    std::cout<<"Starting mesh initialization. \n";
+
+    std::ifstream file(filename);
+
+    if(!file)
+    {
+        std::cout<<"ERROR: WRONG FILE NAME! \n";
+    }
+    
+    unsigned int Nx, Ny, N_cells, N_faces;
+
+    file >> Nx >> Ny >> N_cells >> N_faces;
+    std::cout<< N_faces <<"\n";
+
+    Cells.reserve(N_cells);
+    Faces.reserve(N_faces);
+
+    for(unsigned int k = 0; k < N_cells; ++k )
+    {
+        unsigned int id, i, j;
+        unsigned int faces[4];
+
+        file >> id >> i >> j >> faces[0] >> faces[1] >> faces[2] >> faces[3];
+
+        Cells.emplace_back(id, i, j, faces);
+    }
+
+    for(unsigned int k = 0; k < N_faces; ++k )
+    {
+        unsigned int id, left_id, right_id;
+        bool isVertiacal;
+        int type;
+        file >> id >> left_id >> right_id >> isVertiacal >> type;
+
+        Faces.emplace_back(id, left_id, right_id, isVertiacal, type);
+    }
+
+
+    std::cout<<"Mesh initialization finished. \n";
+
+
+
+}
