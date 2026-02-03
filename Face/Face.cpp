@@ -1,5 +1,5 @@
 #include "Face.h"
 
-Face::Face(int L_ID, int R_ID, bool isVert)
-            :Left_ID(L_ID), Right_ID(R_ID), isVertical(isVert){};
+Face::Face(unsigned int id, int L_ID, int R_ID, bool isVert)
+            :ID(id), Left_ID(L_ID), Right_ID(R_ID), isVertical(isVert){};
 
