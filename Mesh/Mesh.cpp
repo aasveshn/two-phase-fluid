@@ -44,6 +44,7 @@ Mesh::Mesh(std::string filename)
 
     std::cout<<"Mesh initialization finished. \n";
 
+    file.close();
 
 
 }
