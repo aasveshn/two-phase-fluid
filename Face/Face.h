@@ -10,7 +10,8 @@ public:
     const int Left_ID;
     const int Right_ID;
     const bool isVertical;
+    const bool isBorder;
 
-    Face(unsigned int id, int L_ID, int R_ID, bool isVert);
+    Face(unsigned int id, int L_ID, int R_ID, bool isVert, bool isBord);
 
 };
