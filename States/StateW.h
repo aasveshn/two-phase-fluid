@@ -9,7 +9,7 @@ struct StateW {
         double w[7]; 
     };
 
-    StateW() : a1(0), ro1(0), u1(0), P1(0), ro2(0), u2(0), P2(0) {}
+    StateW() : a1(0.0), ro1(0.0), u1(0.0), P1(0.0), ro2(0.0), u2(0.0), P2(0.0) {}
 
     StateW(double a1, double r1, double u1, double P1, double r2, double u2, double P2)
         : a1(a1), ro1(r1), u1(u1), P1(P1), ro2(r2), u2(u2), P2(P2) {}
