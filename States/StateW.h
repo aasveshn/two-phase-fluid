@@ -25,7 +25,20 @@ struct StateW {
         return {a1 * c, ro1 * c, u1 * c, P1 * c, ro2 * c, u2 * c, P2 * c};
     }
 
+    inline StateW& operator=(const StateW& other) {
+       if (this != &other) { 
+            a1 = other.a1; ro1 = other.ro1; u1 = other.u1; P1 = other.P1;
+            ro2 = other.ro2; u2 = other.u2; P2 = other.P2;
+       }
+       return *this;
+    }
+
     
     inline double operator[](int i) const { return w[i]; }
     inline double& operator[](int i) { return w[i]; }
 };
+
+inline StateW operator*(double c, const StateW& state) {
+
+    return state * c; 
+}
