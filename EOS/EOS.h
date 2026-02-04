@@ -100,3 +100,13 @@ inline double g(double ro, double e, const Phase& ph)
     double T = T_ro_e(ro, e, ph);
     return e + P/ro - T*S_P_T(P, T, ph);
 }
+
+inline double C2(double P, double ro, const Phase& ph)
+{
+    return (P/(ro*ro) + ((P+ph.gamma*ph.P0)/(ro*ro*(ph.gamma-1)))) / (1.0/(ro*(ph.gamma-1)));
+}
+
+inline double C(double P, double ro, const Phase& ph)
+{
+    return std::sqrt((P/(ro*ro) + ((P+ph.gamma*ph.P0)/(ro*ro*(ph.gamma-1)))) / (1.0/(ro*(ph.gamma-1))));
+}
