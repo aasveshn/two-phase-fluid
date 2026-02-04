@@ -17,5 +17,7 @@ public:
     std::vector<Cell> Cells;
     std::vector<Face> Faces;
 
-    Mesh(std::string filename);   
+    Mesh(std::string filename);
+    //Необходима реализация 
+    void SetInitialCondidions();
 };

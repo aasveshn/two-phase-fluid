@@ -48,3 +48,23 @@ Mesh::Mesh(std::string filename)
 
 
 }
+
+//Необходима реализация
+void Mesh::SetInitialCondidions()
+{
+    std::cout << "INITIAL CONDITIONS FUNCTION NOT FINISEDH YET!!!!! \n";
+    unsigned int discontinuity;
+    double a1L, ro1L, u1L, P1L, ro2L, u2L, P2L,
+           a1R, ro1R, u1R, P1R, ro2R, u2R, P2R;
+    double WL[7];
+    StateW stateL(a1L, ro1L, u1L, P1L, ro2L, u2L, P2L);
+    StateW stateR(a1R, ro1R, u1R, P1R, ro2R, u2R, P2R);
+    for(
+        auto& cell : Cells)
+    {
+        if(cell.i < discontinuity )
+            cell.W = stateL;
+        else 
+            cell.W = stateR;
+    }
+}
