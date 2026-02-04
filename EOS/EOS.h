@@ -101,12 +101,23 @@ inline double g(double ro, double e, const Phase& ph)
     return e + P/ro - T*S_P_T(P, T, ph);
 }
 
-inline double C2(double P, double ro, const Phase& ph)
+inline double f_C2(double P, double ro, const Phase& ph)
 {
     return (P/(ro*ro) + ((P+ph.gamma*ph.P0)/(ro*ro*(ph.gamma-1)))) / (1.0/(ro*(ph.gamma-1)));
 }
 
-inline double C(double P, double ro, const Phase& ph)
+inline double f_C(double P, double ro, const Phase& ph)
 {
     return std::sqrt((P/(ro*ro) + ((P+ph.gamma*ph.P0)/(ro*ro*(ph.gamma-1)))) / (1.0/(ro*(ph.gamma-1))));
+}
+
+inline double f_PI(const StateW& state)
+{
+    return state.a1*state.P1 + (1.0-state.a1)*state.P2;
+}
+
+inline double f_UI(const StateW& state)
+{
+    return (state.a1*state.ro1*state.u1 + (1.0-state.a1)*state.ro2*state.u2)
+            /(state.a1*state.ro1 + (1.0-state.a1)*state.ro2);
 }
