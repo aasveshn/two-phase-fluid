@@ -11,6 +11,9 @@ public:
     const int Right_ID;
     const bool isVertical;
     const int type;
+    // 0  - внутреняя
+    // 1 - стенка
+    // 2 - граница
 
     Face(unsigned int id, int L_ID, int R_ID, bool isVert, int Type);
 
