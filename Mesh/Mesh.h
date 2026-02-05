@@ -16,6 +16,7 @@ public:
     //const double hx, hy;
     std::vector<Cell> Cells;
     std::vector<Face> Faces;
+    unsigned int VertToHoriz;
 
     Mesh(std::string filename);
     //Необходима реализация 

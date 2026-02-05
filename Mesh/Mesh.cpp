@@ -37,6 +37,8 @@ Mesh::Mesh(std::string filename)
         bool isVertiacal;
         int type;
         file >> id >> left_id >> right_id >> isVertiacal >> type;
+        if(!isVertiacal)
+            VertToHoriz = k;
 
         Faces.emplace_back(id, left_id, right_id, isVertiacal, type);
     }
