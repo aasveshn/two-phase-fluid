@@ -3,7 +3,7 @@ TARGET = run
 CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++17
 
-SRC = main.cpp  Cell/Cell.cpp Phase/Phase.cpp Components/Components.cpp Face/Face.cpp Mesh/Mesh.cpp MUSCL/MUSCL.cpp
+SRC = main.cpp  Cell/Cell.cpp Phase/Phase.cpp Components/Components.cpp Face/Face.cpp Mesh/Mesh.cpp MUSCL/MUSCL.cpp RiemanSolver/RiemanSolver.cpp
 OBJ = $(SRC:.cpp =.o)
 
 $(TARGET): $(OBJ)
