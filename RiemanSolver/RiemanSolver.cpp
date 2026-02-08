@@ -3,7 +3,7 @@
 RiemanSolver::RiemanSolver(unsigned int N, unsigned int k): Flux_X(k), Flux_Y(N-k){};
 
 void RiemanSolver::HLLC(const Mesh& mesh, std::vector<StateW>& WL_in, std::vector<StateW>& WR_in,  
-                        unsigned int H_idx, bool is_X_dir, const Components& comp)
+                        unsigned int H_idx, bool is_X_dir, const Components& phases)
 {
     
     unsigned int N, interval_L, interval_R;
@@ -30,6 +30,8 @@ void RiemanSolver::HLLC(const Mesh& mesh, std::vector<StateW>& WL_in, std::vecto
     int idx_L, idx_R;
     StateW&  WL = WL_in[0];
     StateW&  WR = WR_in[0];
+    StateU UL_C;
+    StateU UR_C;
 
     for(int i = interval_L; i < N; ++i)
     {
@@ -50,14 +52,14 @@ void RiemanSolver::HLLC(const Mesh& mesh, std::vector<StateW>& WL_in, std::vecto
         double a2L = 1.0 - WL.a1;
         double a2R = 1.0 - WR.a1;
         
-        StateU UL(WL, comp);
-        StateU UR(WR, comp);
+        StateU UL(WL, phases);
+        StateU UR(WR, phases);
 
-        double C1L = f_C(WL.P1, WL.ro1, comp.p1);
-        double C2L = f_C(WL.P2, WL.ro2, comp.p2);
+        double C1L = f_C(WL.P1, WL.ro1, phases.p1);
+        double C2L = f_C(WL.P2, WL.ro2, phases.p2);
 
-        double C1R = f_C(WR.P1, WR.ro1, comp.p1);
-        double C2R = f_C(WR.P2, WR.ro2, comp.p2);
+        double C1R = f_C(WR.P1, WR.ro1, phases.p1);
+        double C2R = f_C(WR.P2, WR.ro2, phases.p2);
         
 
         double sL = std::min({WL.u1 - C1L, WL.u2 - C2L, WR.u1 - C1R, WR.u2 - C2R});
@@ -76,25 +78,24 @@ void RiemanSolver::HLLC(const Mesh& mesh, std::vector<StateW>& WL_in, std::vecto
         double d_sL = sL - s_C;
         double d_sR = sR - s_C;
 
-        StateU UL_C;
-        StateU UR_C;
+       
 
         UL_C[0] = WL.a1*WL.ro1*((sL-WL.u1)/d_sL);
         UL_C[1] = UL_C[0]*s_C;
-        UL_C[2] = UL_C[0]*(E(e_P_ro(WL.P1, WL.ro1, comp.p1), WL.u1)+
+        UL_C[2] = UL_C[0]*(E(e_P_ro(WL.P1, WL.ro1, phases.p1), WL.u1)+
                   (s_C-WL.u1)*(s_C + WL.P1/(WL.ro1*(sL-WL.u1))));
         UL_C[3] = a2L*WL.ro2*((sL-WL.u2)/d_sL);
         UL_C[4] = UL_C[0]*s_C;
-        UL_C[5] = UL_C[0]*(E(e_P_ro(WL.P2, WL.ro2, comp.p2), WL.u2)+
+        UL_C[5] = UL_C[0]*(E(e_P_ro(WL.P2, WL.ro2, phases.p2), WL.u2)+
                   (s_C-WL.u2)*(s_C + WL.P2/(WL.ro2*(sL-WL.u2))));
 
         UR_C[0] = WR.a1*WR.ro1*((sR-WR.u1)/d_sR);
         UR_C[1] = UR_C[0]*s_C;
-        UR_C[2] = UR_C[0]*(E(e_P_ro(WR.P1, WR.ro1, comp.p1), WR.u1)+
+        UR_C[2] = UR_C[0]*(E(e_P_ro(WR.P1, WR.ro1, phases.p1), WR.u1)+
                   (s_C-WR.u1)*(s_C + WR.P1/(WR.ro1*(sR-WR.u1))));
         UR_C[3] = a2R*WR.ro2*((sR-WR.u2)/d_sR);
         UR_C[4] = UR_C[0]*s_C;
-        UR_C[5] = UR_C[0]*(E(e_P_ro(WR.P2, WR.ro2, comp.p2), WR.u2)+
+        UR_C[5] = UR_C[0]*(E(e_P_ro(WR.P2, WR.ro2, phases.p2), WR.u2)+
                   (s_C-WR.u2)*(s_C + WR.P2/(WR.ro2*(sR-WR.u2))));
 
         if(sL >= 0)
