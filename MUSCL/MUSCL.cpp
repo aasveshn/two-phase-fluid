@@ -1,7 +1,6 @@
 #include "MUSCL.h"
 
-MUSCL::MUSCL(int N, const Components& components) : B(betta), W_L(N), W_R(N), 
-                                                    phases(components.p1, components.p2){};
+MUSCL::MUSCL(int N) : B(betta), W_L(N), W_R(N){};
 //MUSCL::MUSCL(int N) : B(betta), W_L(N), W_R(N), W_ex_L(N), W_ex_R(N){};
 
 
@@ -25,7 +24,7 @@ StateW MUSCL::slopLimiter(const StateW& dL, const StateW& dR)
     return result;
 }
 
-StateW MUSCL::A_prod_W(const StateW& W, const StateW& WL, const StateW& WR)
+StateW MUSCL::A_prod_W(const StateW& W, const StateW& WL, const StateW& WR, const Components& phases)
 {
     StateW result;
     std::vector<std::vector<double>> A(7, std::vector<double>(7,0));
@@ -73,7 +72,7 @@ StateW MUSCL::A_prod_W(const StateW& W, const StateW& WL, const StateW& WR)
     return result;
 }
 
-void MUSCL::MUSCL_Operator(const Mesh& mesh, bool is_X_dir, double dt)
+void MUSCL::MUSCL_Operator(const Mesh& mesh, bool is_X_dir, double dt, const Components& phases)
 {
     double h;
     unsigned int face_dirs[2];
@@ -123,7 +122,7 @@ void MUSCL::MUSCL_Operator(const Mesh& mesh, bool is_X_dir, double dt)
         W_L[i] = mesh.Cells[i].W - 0.5 * slope;
         W_R[i] = mesh.Cells[i].W + 0.5 * slope;
                 
-        AWprod = A_prod_W(mesh.Cells[i].W, W_L[i], W_R[i]);
+        AWprod = A_prod_W(mesh.Cells[i].W, W_L[i], W_R[i], phases);
 
         W_L[i] = W_L[i] - (0.5*dt/h) * AWprod;
         W_R[i] = W_R[i] - (0.5*dt/h) * AWprod;
