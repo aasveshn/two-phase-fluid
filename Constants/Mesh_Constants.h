@@ -1,3 +1,4 @@
+#pragma once
 //CFL
 const double CFL = 0.1;
 // cell constants

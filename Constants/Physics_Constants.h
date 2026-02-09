@@ -1,3 +1,4 @@
+#pragma once
 //water vapor phase 
 const double gamma_water_vapor = 1.430;
 const double P0_water_vapor = 0.0;
