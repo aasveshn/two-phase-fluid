@@ -77,13 +77,13 @@ void HyperbolicOperator::GodunovStep(bool is_X_dir, double dt)
 
 }
                                                                 
-void HyperbolicOperator::HyperbolicStep(bool is_X_dir, double dt)
+void HyperbolicOperator::HyperbolicStep(double dt)
 {
     //X step
     muscl.MUSCL_Operator(mesh, true, dt, phases);
     rieamn.HLLC(mesh, muscl.getW_L(), muscl.getW_R(), mesh.VertToHoriz, true, phases);
     GodunovStep(true, dt);
-    //Y strep
+    //Y step
     muscl.MUSCL_Operator(mesh, false, dt, phases);
     rieamn.HLLC(mesh, muscl.getW_L(), muscl.getW_R(), mesh.VertToHoriz, false, phases);
     GodunovStep(false, dt);

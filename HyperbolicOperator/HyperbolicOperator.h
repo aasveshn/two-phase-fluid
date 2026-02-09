@@ -22,7 +22,7 @@ private:
 public:
 
     HyperbolicOperator(Mesh& msh, const Components& comp);
-    void HyperbolicStep(bool is_X_dir, double dt);
+    void HyperbolicStep(double dt);
 
 private:
     void GodunovStep(bool is_X_dir, double dt);
