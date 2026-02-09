@@ -24,8 +24,8 @@ public:
     
     MUSCL(int N);
     void MUSCL_Operator(const Mesh& mesh, bool is_X_dir, double dt, const Components& phases);
-    const std::vector<StateW>& getW_L() {return W_L;}
-    const std::vector<StateW>& getW_R() {return W_R;}
+    const std::vector<StateW>& getW_L() const {return W_L;}
+    const std::vector<StateW>& getW_R() const {return W_R;}
 
 private:
 

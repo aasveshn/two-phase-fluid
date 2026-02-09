@@ -22,9 +22,9 @@ private:
 public:
 
     RiemanSolver(unsigned int N, unsigned int k);
-    void HLLC(const Mesh& mesh, std::vector<StateW>& WL_in, std::vector<StateW>& WR_in,
+    void HLLC(const Mesh& mesh, const std::vector<StateW>& WL_in, const std::vector<StateW>& WR_in,
               unsigned int H_idx, bool is_X_dir, const Components& phases);
-    const std::vector<StateU>& getXFlux() {return Flux_X;};
-    const std::vector<StateU>& getYFlux() {return Flux_Y;};
+    const std::vector<StateU>& getXFlux() const {return Flux_X;};
+    const std::vector<StateU>& getYFlux() const {return Flux_Y;};
 
 };

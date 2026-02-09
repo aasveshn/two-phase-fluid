@@ -2,7 +2,7 @@
 
 RiemanSolver::RiemanSolver(unsigned int N, unsigned int k): Flux_X(k), Flux_Y(N-k){};
 
-void RiemanSolver::HLLC(const Mesh& mesh, std::vector<StateW>& WL_in, std::vector<StateW>& WR_in,  
+void RiemanSolver::HLLC(const Mesh& mesh, const std::vector<StateW>& WL_in, const std::vector<StateW>& WR_in,  
                         unsigned int H_idx, bool is_X_dir, const Components& phases)
 {
     
@@ -28,8 +28,7 @@ void RiemanSolver::HLLC(const Mesh& mesh, std::vector<StateW>& WL_in, std::vecto
     }
 
     int idx_L, idx_R;
-    StateW&  WL = WL_in[0];
-    StateW&  WR = WR_in[0];
+    
     StateU UL_C;
     StateU UR_C;
 
@@ -46,8 +45,8 @@ void RiemanSolver::HLLC(const Mesh& mesh, std::vector<StateW>& WL_in, std::vecto
             continue;
         }
 
-        WL = WR_in[idx_L];
-        WR = WL_in[idx_R];
+        const StateW& WL = WR_in[idx_L];
+        const StateW& WR = WL_in[idx_R];
 
         double a2L = 1.0 - WL.a1;
         double a2R = 1.0 - WR.a1;
