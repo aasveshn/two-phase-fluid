@@ -46,13 +46,17 @@ double  Solver::compute_dt()
 void Solver::Solve()
 {
     double time = 0.0;
-    double dt;
+    double dt = 1e-10;
     int step = 0;
+    
+   //1500   
     while(time < T)
     {
-        dt = compute_dt();
         HyperbolicOp.HyperbolicStep(dt);
+        time += dt;
+        dt = compute_dt();
         ++step;
+        if(step == 1)
+            break;
     }
-
 }
