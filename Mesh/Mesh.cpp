@@ -1,5 +1,5 @@
 #include "Mesh.h"
-#include <iomanip> // Для красивого вывода чисел
+
 
 
 Mesh::Mesh(std::string filename)
@@ -37,7 +37,7 @@ Mesh::Mesh(std::string filename)
         bool isVertiacal;
         int type;
         file >> id >> left_id >> right_id >> isVertiacal >> type;
-        if(!isVertiacal)
+        if(isVertiacal)
             VertToHoriz = k;
 
         Faces.emplace_back(id, left_id, right_id, isVertiacal, type);
@@ -54,8 +54,7 @@ Mesh::Mesh(std::string filename)
 //Необходима реализация
 void Mesh::SetInitialCondidions()
 {
-    std::cout << "INITIAL CONDITIONS FUNCTION NOT FINISEDH YET!!!!! \n";
-    unsigned int discontinuity;
+    unsigned int discontinuity = 75; //100
     double a1L, ro1L, u1L, P1L, ro2L, u2L, P2L,
            a1R, ro1R, u1R, P1R, ro2R, u2R, P2R;
     double WL[7];
@@ -87,4 +86,5 @@ void Mesh::SetInitialCondidions()
         else 
             cell.W = stateR;
     }
+
 }
