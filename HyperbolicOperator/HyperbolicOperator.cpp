@@ -27,13 +27,12 @@ void HyperbolicOperator::GodunovStep(bool is_X_dir, double dt)
         k = mesh.VertToHoriz;
     }
     std::vector<StateU> flux = is_X_dir ? rieamn.getXFlux() : rieamn.getYFlux();
-    StateW& W = mesh.Cells[0].W;
     unsigned int face_L, face_R;
 
     for(int i = 0; i < N; ++i)
     {
 
-        W = mesh.Cells[i].W;
+        StateW& W = mesh.Cells[i].W;
         StateU U_prev(W, phases);
         StateU U_new;
 
@@ -43,11 +42,8 @@ void HyperbolicOperator::GodunovStep(bool is_X_dir, double dt)
 
         double da_1 = muscl.getW_R()[i].a1 - muscl.getW_L()[i].a1;
 
-        face_L = mesh.Cells[i].faces_ID[face_dirs[0]] - k;
-        face_R = mesh.Cells[i].faces_ID[face_dirs[1]] - k;
-
-        //StateU& flux_L = 
-        //StateU& flux_R;
+        face_L = mesh.Cells[i].faces_ID[face_dirs[0]] - k ;
+        face_R = mesh.Cells[i].faces_ID[face_dirs[1]] - k ;
 
         U_new[0] = U_prev[0] - (dt/h)*(flux[face_R][0] - flux[face_L][0]);
         U_new[1] = U_prev[1] - (dt/h)*((flux[face_R][1] - flux[face_L][1]) +  da_1*PI);
@@ -62,7 +58,6 @@ void HyperbolicOperator::GodunovStep(bool is_X_dir, double dt)
         double E1_new = U_new[2]/U_new[0];
         double E2_new = U_new[5]/U_new[3];
         
-
         mesh.Cells[i].W.a1 = a1_new;
         mesh.Cells[i].W.ro1 = U_new[0]/a1_new;
         mesh.Cells[i].W.u1 = U_new[1]/U_new[0];
@@ -73,6 +68,7 @@ void HyperbolicOperator::GodunovStep(bool is_X_dir, double dt)
         mesh.Cells[i].W.u2 = U_new[4]/U_new[3];
         double e2_new = E2_new - mesh.Cells[i].W.u2*mesh.Cells[i].W.u2*0.5;
         mesh.Cells[i].W.P2 = P_ro_e(mesh.Cells[i].W.ro2, e2_new, phases.p2);
+           
     }
 
 }
@@ -83,6 +79,7 @@ void HyperbolicOperator::HyperbolicStep(double dt)
     muscl.MUSCL_Operator(mesh, true, dt, phases);
     rieamn.HLLC(mesh, muscl.getW_L(), muscl.getW_R(), mesh.VertToHoriz, true, phases);
     GodunovStep(true, dt);
+    
     //Y step
     muscl.MUSCL_Operator(mesh, false, dt, phases);
     rieamn.HLLC(mesh, muscl.getW_L(), muscl.getW_R(), mesh.VertToHoriz, false, phases);
