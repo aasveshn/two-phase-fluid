@@ -103,7 +103,7 @@ void MUSCL::MUSCL_Operator(const Mesh& mesh, bool is_X_dir, double dt, const Com
             d_L = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
             d_R = mesh.Cells[R_id].W - mesh.Cells[i].W;
         }
-        if(mesh.Faces[mesh.Cells[i].faces_ID[face_dirs[1]]].type != 0)
+        else if(mesh.Faces[mesh.Cells[i].faces_ID[face_dirs[1]]].type != 0)
         {
             L_id = mesh.Faces[mesh.Cells[i].faces_ID[face_dirs[0]]].Left_ID;
             d_L = mesh.Cells[i].W - mesh.Cells[L_id].W;
@@ -121,11 +121,12 @@ void MUSCL::MUSCL_Operator(const Mesh& mesh, bool is_X_dir, double dt, const Com
 
         W_L[i] = mesh.Cells[i].W - 0.5 * slope;
         W_R[i] = mesh.Cells[i].W + 0.5 * slope;
-                
+               
         AWprod = A_prod_W(mesh.Cells[i].W, W_L[i], W_R[i], phases);
 
         W_L[i] = W_L[i] - (0.5*dt/h) * AWprod;
         W_R[i] = W_R[i] - (0.5*dt/h) * AWprod;
+        
     }
 
 }
