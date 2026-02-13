@@ -19,6 +19,5 @@ public:
     unsigned int VertToHoriz;
 
     Mesh(std::string filename);
-    //Необходима реализация 
     void SetInitialCondidions();
 };
