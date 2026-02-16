@@ -89,9 +89,9 @@ inline double S_P_T(double P, double T, const Phase& ph)
     return ph.Cv * (ph.gamma*std::log(T) - (ph.gamma - 1.0)*std::log(P + ph.P0)) + ph.qs;
 };
 
-inline double E(double e, double u)
+inline double E(double e, double u, double v)
 {
-    return e + (u*u)*0.5;
+    return e + (u*u + v*v)*0.5;
 };
 
 inline double g(double ro, double e, const Phase& ph)
@@ -115,9 +115,16 @@ inline double f_PI(const StateW& state)
 {
     return state.a1*state.P1 + (1.0-state.a1)*state.P2;
 }
-
-inline double f_UI(const StateW& state)
+//?
+inline double f_UI_x(const StateW& state)
 {
+    
     return (state.a1*state.ro1*state.u1 + (1.0-state.a1)*state.ro2*state.u2)
+            /(state.a1*state.ro1 + (1.0-state.a1)*state.ro2);
+}
+
+inline double f_UI_y(const StateW& state)
+{
+    return (state.a1*state.ro1*state.v1 + (1.0-state.a1)*state.ro2*state.v2)
             /(state.a1*state.ro1 + (1.0-state.a1)*state.ro2);
 }
