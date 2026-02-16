@@ -5,146 +5,158 @@ RiemanSolver::RiemanSolver(unsigned int N, unsigned int k): Flux_X(k+1), Flux_Y(
 void RiemanSolver::HLLC(const Mesh& mesh, const std::vector<StateW>& WL_in, const std::vector<StateW>& WR_in,  
                         unsigned int H_idx, bool is_X_dir, const Components& phases)
 {
-    
-    unsigned int N, interval_L, interval_R;
-    unsigned int face_dirs[2];
+    unsigned int interval_L, N;
     int k;
     std::vector<StateU>& flux = is_X_dir ? Flux_X : Flux_Y;
 
-    if(is_X_dir)
-    {
+    if(is_X_dir) {
         interval_L = 0;
-        interval_R = H_idx -1;
-        N = H_idx+1;
-        face_dirs[0] = 0;
-        face_dirs[1] = 1;
-        k=0;
-    }
-    else
-    {
+        N = H_idx+1; 
+        k = 0;
+    } else {
         interval_L = H_idx;
-        interval_R = mesh.Faces.size()-1;
-        N = mesh.Faces.size() - H_idx;
-        face_dirs[0] = 2;
-        face_dirs[1] = 3;
+        N = mesh.Faces.size(); 
         k = H_idx;
     }
 
-    int idx_L, idx_R;
-    
-    StateU UL_C;
-    StateU UR_C;
-
-    for(int i = interval_L; i < N; ++i)
+    for(unsigned int i = interval_L; i < N; ++i)
     {
-
-        
-        idx_L = mesh.Faces[i].Left_ID;
-        idx_R = mesh.Faces[i].Right_ID;
+        int idx_L = mesh.Faces[i].Left_ID;
+        int idx_R = mesh.Faces[i].Right_ID;
  
-        
-        if(idx_L == -1)
-        {    
-            idx_L = idx_R;
-        }
-        else if(idx_R == -1)
-        {
-            idx_R = idx_L;
-        }
-        
+        if(idx_L == -1) idx_L = idx_R;
+        else if(idx_R == -1) idx_R = idx_L;
 
         const StateW& WL = WR_in[idx_L];
         const StateW& WR = WL_in[idx_R];
 
-        double a2L = 1.0 - WL.a1;
-        double a2R = 1.0 - WR.a1;
+        double a1L = WL.a1; double a2L = 1.0 - a1L;
+        double a1R = WR.a1; double a2R = 1.0 - a1R;
         
-        StateU UL(WL, phases);
+        StateU UL(WL, phases); 
         StateU UR(WR, phases);
 
         double C1L = f_C(WL.P1, WL.ro1, phases.p1);
         double C2L = f_C(WL.P2, WL.ro2, phases.p2);
-
         double C1R = f_C(WR.P1, WR.ro1, phases.p1);
         double C2R = f_C(WR.P2, WR.ro2, phases.p2);
         
+        double roL = a1L*WL.ro1 + a2L*WL.ro2;
+        double PL  = a1L*WL.P1  + a2L*WL.P2;
+        double roR = a1R*WR.ro1 + a2R*WR.ro2;
+        double PR  = a1R*WR.P1  + a2R*WR.P2;
+        
+        double sL, sR, uL, uR;
+        StateU UL_C, UR_C;
 
-        double sL = std::min({WL.u1 - C1L, WL.u2 - C2L, WR.u1 - C1R, WR.u2 - C2R});
-        double sR = std::max({WL.u1 + C2L, WL.u2 + C2L, WR.u1 + C1R, WR.u2 + C2R});
-
-
-        double roL = WL.a1*WL.ro1 + a2L*WL.ro2;
-        double PL = WL.a1*WL.P1 + a2L*WL.P2;
-        double uL = (WL.a1*WL.ro1*WL.u1 + a2L*WL.ro2*WL.u2)/roL;
-
-        double roR = WR.a1*WR.ro1 + a2R*WR.ro2;
-        double PR = WR.a1*WR.P1 + a2R*WR.P2;
-        double uR = (WR.a1*WR.ro1*WR.u1 + a2R*WR.ro2*WR.u2)/roR;
-
-        double s_C = (PR - PL + roL*uL*(sL-uL) - roR*uR*(sR-uR))/(roL*(sL-uL) - roR*(sR-uR));
-        double d_sL = sL - s_C;
-        double d_sR = sR - s_C;
-
-       
-
-        UL_C[0] = WL.a1*WL.ro1*((sL-WL.u1)/d_sL);
-        UL_C[1] = UL_C[0]*s_C;
-        UL_C[2] = UL_C[0]*(E(e_P_ro(WL.P1, WL.ro1, phases.p1), WL.u1)+
-                  (s_C-WL.u1)*(s_C + WL.P1/(WL.ro1*(sL-WL.u1))));
-        UL_C[3] = a2L*WL.ro2*((sL-WL.u2)/d_sL);
-        UL_C[4] = UL_C[0]*s_C;
-        UL_C[5] = UL_C[0]*(E(e_P_ro(WL.P2, WL.ro2, phases.p2), WL.u2)+
-                  (s_C-WL.u2)*(s_C + WL.P2/(WL.ro2*(sL-WL.u2))));
-
-        UR_C[0] = WR.a1*WR.ro1*((sR-WR.u1)/d_sR);
-        UR_C[1] = UR_C[0]*s_C;
-        UR_C[2] = UR_C[0]*(E(e_P_ro(WR.P1, WR.ro1, phases.p1), WR.u1)+
-                  (s_C-WR.u1)*(s_C + WR.P1/(WR.ro1*(sR-WR.u1))));
-        UR_C[3] = a2R*WR.ro2*((sR-WR.u2)/d_sR);
-        UR_C[4] = UR_C[0]*s_C;
-        UR_C[5] = UR_C[0]*(E(e_P_ro(WR.P2, WR.ro2, phases.p2), WR.u2)+
-                  (s_C-WR.u2)*(s_C + WR.P2/(WR.ro2*(sR-WR.u2))));
-
-        if(sL >= 0)
+        if(is_X_dir)
         {
-            flux[i-k][0] = UL[1];
-            flux[i-k][1] = UL[1]*WL.u1 + WL.a1*WL.P1;
-            flux[i-k][2] = WL.a1*(WL.ro1*(UL[2]/UL[0]) + WL.P1)*WL.u1;
-            flux[i-k][3] = UL[4];
-            flux[i-k][4] = UL[4]*WL.u2 + a2L*WL.P2;
-            flux[i-k][5] = a2L*(WL.ro2*(UL[5]/UL[3]) + WL.P2)*WL.u2;
-        }
-        else if(sL <= 0 && s_C >= 0)
-        {
-            flux[i-k][0] = UL[1] + sL*(UL_C[0] - UL[0]);
-            flux[i-k][1] = UL[1] * WL.u1 + WL.a1*WL.P1 + sL*(UL_C[1] - UL[1]);
-            flux[i-k][2] = WL.a1 * (WL.ro1*(UL[2]/UL[0]) + WL.P1) * WL.u1 + sL*(UL_C[2] - UL[2]);
-            flux[i-k][3] = UL[4] + sL*(UL_C[3] - UL[3]);
-            flux[i-k][4] = UL[4] * WL.u2 + a2L*WL.P2 + sL*(UL_C[4] - UL[4]);
-            flux[i-k][5] = a2L * (WL.ro2*(UL[5]/UL[3]) + WL.P2) * WL.u2 + sL*(UL_C[5] - UL[5]);
-        }
-        else if(s_C <= 0 && sR >= 0)
-        {
-            flux[i-k][0] = UR[1] + sR*(UR_C[0] - UR[0]);
-            flux[i-k][1] = UR[1] * WR.u1 + WR.a1*WR.P1 + sR*(UR_C[1] - UR[1]);
-            flux[i-k][2] = WR.a1 * (WR.ro1*(UR[2]/UR[0]) + WR.P1) * WR.u1 + sR*(UR_C[2] - UR[2]);
-            flux[i-k][3] = UR[4] + sR*(UR_C[3] - UR[3]);
-            flux[i-k][4] = UR[4] * WR.u2 + a2R*WR.P2 + sR*(UR_C[4] - UR[4]);
-            flux[i-k][5] = a2R * (WR.ro2*(UR[5]/UR[3]) + WR.P2) * WR.u2 + sR*(UR_C[5] - UR[5]);
-        }
-        else if(sR <= 0)
-        {
-            flux[i-k][0] = UR[1];
-            flux[i-k][1] = UR[1]*WR.u1 + WR.a1*WR.P1;
-            flux[i-k][2] = WR.a1*(WR.ro1*(UR[2]/UR[0]) + WR.P1)*WR.u1;
-            flux[i-k][3] = UR[4];
-            flux[i-k][4] = UR[4]*WR.u2 + a2R*WR.P2;
-            flux[i-k][5] = a2R*(WR.ro2*(UR[5]/UR[3]) + WR.P2)*WR.u2;
+            
+            sL = std::min({WL.u1 - C1L, WL.u2 - C2L, WR.u1 - C1R, WR.u2 - C2R});
+            sR = std::max({WL.u1 + C1L, WL.u2 + C2L, WR.u1 + C1R, WR.u2 + C2R});
+            uL = (a1L*WL.ro1*WL.u1 + a2L*WL.ro2*WL.u2)/roL;
+            uR = (a1R*WR.ro1*WR.u1 + a2R*WR.ro2*WR.u2)/roR;
+
+            double s_C = (PR - PL + roL*uL*(sL-uL) - roR*uR*(sR-uR))/(roL*(sL-uL) - roR*(sR-uR));
+            
+           
+            UL_C[0] = a1L*WL.ro1*((sL-WL.u1)/(sL-s_C));
+            UL_C[1] = UL_C[0]*s_C;   
+            UL_C[2] = UL_C[0]*WL.v1; 
+            UL_C[3] = UL_C[0]*(E(e_P_ro(WL.P1, WL.ro1, phases.p1), WL.u1, WL.v1) + (s_C-WL.u1)*(s_C + WL.P1/(WL.ro1*(sL-WL.u1))));
+            
+            
+            UL_C[4] = a2L*WL.ro2*((sL-WL.u2)/(sL-s_C));
+            UL_C[5] = UL_C[4]*s_C;   
+            UL_C[6] = UL_C[4]*WL.v2; 
+            UL_C[7] = UL_C[4]*(E(e_P_ro(WL.P2, WL.ro2, phases.p2), WL.u2, WL.v2) + (s_C-WL.u2)*(s_C + WL.P2/(WL.ro2*(sL-WL.u2))));
+
+            
+            UR_C[0] = a1R*WR.ro1*((sR-WR.u1)/(sR-s_C));
+            UR_C[1] = UR_C[0]*s_C; UR_C[2] = UR_C[0]*WR.v1;
+            UR_C[3] = UR_C[0]*(E(e_P_ro(WR.P1, WR.ro1, phases.p1), WR.u1, WR.v1) + (s_C-WR.u1)*(s_C + WR.P1/(WR.ro1*(sR-WR.u1))));
+            UR_C[4] = a2R*WR.ro2*((sR-WR.u2)/(sR-s_C));
+            UR_C[5] = UR_C[4]*s_C; UR_C[6] = UR_C[4]*WR.v2;
+            UR_C[7] = UR_C[4]*(E(e_P_ro(WR.P2, WR.ro2, phases.p2), WR.u2, WR.v2) + (s_C-WR.u2)*(s_C + WR.P2/(WR.ro2*(sR-WR.u2))));
+
+            
+            if(sL >= 0) {
+                flux[i-k][0] = UL[1]; 
+                flux[i-k][1] = UL[1]*WL.u1 + a1L*WL.P1; 
+                flux[i-k][2] = UL[1]*WL.v1; 
+                flux[i-k][3] = (UL[3] + a1L*WL.P1)*WL.u1;
+                flux[i-k][4] = UL[5];
+                flux[i-k][5] = UL[5]*WL.u2 + a2L*WL.P2; 
+                flux[i-k][6] = UL[5]*WL.v2; 
+                flux[i-k][7] = (UL[7] + a2L*WL.P2)*WL.u2;
+            } else if(sL <= 0 && s_C >= 0) {
+                for(int j=0; j<8; ++j) flux[i-k][j] = get_F_X(UL, WL, a1L, a2L)[j] + sL*(UL_C[j] - UL[j]);
+            } else if(s_C <= 0 && sR >= 0) {
+                for(int j=0; j<8; ++j) flux[i-k][j] = get_F_X(UR, WR, a1R, a2R)[j] + sR*(UR_C[j] - UR[j]);
+            } else {
+                flux[i-k][0] = UR[1]; 
+                flux[i-k][1] = UR[1]*WR.u1 + a1R*WR.P1;
+                flux[i-k][2] = UR[1]*WR.v1; 
+                flux[i-k][3] = (UR[3] + a1R*WR.P1)*WR.u1;
+                flux[i-k][4] = UR[5];
+                flux[i-k][5] = UR[5]*WR.u2 + a2R*WR.P2; 
+                flux[i-k][6] = UR[5]*WR.v2;
+                flux[i-k][7] = (UR[7] + a2R*WR.P2)*WR.u2;
+            }
         }
         else
         {
-            std::cout<<"HLLC ERROR \n";
+           
+            sL = std::min({WL.v1 - C1L, WL.v2 - C2L, WR.v1 - C1R, WR.v2 - C2R});
+            sR = std::max({WL.v1 + C1L, WL.v2 + C2L, WR.v1 + C1R, WR.v2 + C2R});
+            uL = (a1L*WL.ro1*WL.v1 + a2L*WL.ro2*WL.v2)/roL;
+            uR = (a1R*WR.ro1*WR.v1 + a2R*WR.ro2*WR.v2)/roR;
+
+            double s_C = (PR - PL + roL*uL*(sL-uL) - roR*uR*(sR-uR))/(roL*(sL-uL) - roR*(sR-uR));
+
+            
+            UL_C[0] = a1L*WL.ro1*((sL-WL.v1)/(sL-s_C));
+            UL_C[1] = UL_C[0]*WL.u1; 
+            UL_C[2] = UL_C[0]*s_C;   
+            UL_C[3] = UL_C[0]*(E(e_P_ro(WL.P1, WL.ro1, phases.p1), WL.u1, WL.v1) + (s_C-WL.v1)*(s_C + WL.P1/(WL.ro1*(sL-WL.v1))));
+
+           
+            UL_C[4] = a2L*WL.ro2*((sL-WL.v2)/(sL-s_C));
+            UL_C[5] = UL_C[4]*WL.u2; 
+            UL_C[6] = UL_C[4]*s_C;   
+            UL_C[7] = UL_C[4]*(E(e_P_ro(WL.P2, WL.ro2, phases.p2), WL.u2, WL.v2) + (s_C-WL.v2)*(s_C + WL.P2/(WL.ro2*(sL-WL.v2))));
+
+            
+            UR_C[0] = a1R*WR.ro1*((sR-WR.v1)/(sR-s_C));
+            UR_C[1] = UR_C[0]*WR.u1; UR_C[2] = UR_C[0]*s_C;
+            UR_C[3] = UR_C[0]*(E(e_P_ro(WR.P1, WR.ro1, phases.p1), WR.u1, WR.v1) + (s_C-WR.v1)*(s_C + WR.P1/(WR.ro1*(sR-WR.v1))));
+            UR_C[4] = a2R*WR.ro2*((sR-WR.v2)/(sR-s_C));
+            UR_C[5] = UR_C[4]*WR.u2; UR_C[6] = UR_C[4]*s_C;
+            UR_C[7] = UR_C[4]*(E(e_P_ro(WR.P2, WR.ro2, phases.p2), WR.u2, WR.v2) + (s_C-WR.v2)*(s_C + WR.P2/(WR.ro2*(sR-WR.v2))));
+
+            if(sL >= 0) {
+                flux[i-k][0] = UL[2];
+                flux[i-k][1] = UL[2]*WL.u1; 
+                flux[i-k][2] = UL[2]*WL.v1 + a1L*WL.P1; 
+                flux[i-k][3] = (UL[3] + a1L*WL.P1)*WL.v1;
+                flux[i-k][4] = UL[6]; 
+                flux[i-k][5] = UL[6]*WL.u2; 
+                flux[i-k][6] = UL[6]*WL.v2 + a2L*WL.P2; 
+                flux[i-k][7] = (UL[7] + a2L*WL.P2)*WL.v2;
+            } else if(sL <= 0 && s_C >= 0) {
+                for(int j=0; j<8; ++j) flux[i-k][j] = get_F_Y(UL, WL, a1L, a2L)[j] + sL*(UL_C[j] - UL[j]);
+            } else if(s_C <= 0 && sR >= 0) {
+                for(int j=0; j<8; ++j) flux[i-k][j] = get_F_Y(UR, WR, a1R, a2R)[j] + sR*(UR_C[j] - UR[j]);
+            } else {
+                flux[i-k][0] = UR[2]; 
+                flux[i-k][1] = UR[2]*WR.u1;
+                flux[i-k][2] = UR[2]*WR.v1 + a1R*WR.P1; 
+                flux[i-k][3] = (UR[7] + a1R*WR.P1)*WR.v1;
+                flux[i-k][4] = UR[6]; 
+                flux[i-k][5] = UR[6]*WR.u2; 
+                flux[i-k][6] = UR[6]*WR.v2 + a2R*WR.P2; 
+                flux[i-k][7] = (UR[7] + a2R*WR.P2)*WR.v2;
+            }
         }
     }
 }
-
