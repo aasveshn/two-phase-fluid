@@ -1,15 +1,12 @@
 #include "MUSCL.h"
 
 MUSCL::MUSCL(int N) : B(betta), W_L(N), W_R(N){};
-//MUSCL::MUSCL(int N) : B(betta), W_L(N), W_R(N), W_ex_L(N), W_ex_R(N){};
-
-
 
 StateW MUSCL::slopLimiter(const StateW& dL, const StateW& dR)
 {
     StateW result;
 
-    for(int i = 0; i < 7; ++i)
+    for(int i = 0; i < 9; ++i)
     {
         if(dR[i] > 0)
             result[i] = std::max({0.0, 
@@ -24,52 +21,53 @@ StateW MUSCL::slopLimiter(const StateW& dL, const StateW& dR)
     return result;
 }
 
-StateW MUSCL::A_prod_W(const StateW& W, const StateW& WL, const StateW& WR, const Components& phases)
+StateW MUSCL::A_prod_W(const StateW& W, bool is_X_dir, const StateW& WL, const StateW& WR, const Components& phases)
 {
     StateW result;
-    std::vector<std::vector<double>> A(7, std::vector<double>(7,0));
-    double a2 = 1.0 - W.a1;
-    double UI = f_UI(W);
-    double PI = f_PI(W);
-    double CI1 = f_C(PI, W.ro1, phases.p1);
-    double CI2 = f_C(PI, W.ro2, phases.p2);
-    double C1 = f_C(W.P1, W.ro1, phases.p1);
-    double C2 = f_C(W.P2, W.ro2, phases.p2);
+    StateW dW = WR - WL;
 
-    A[0][0] = UI;
+    double a1 = W.a1;
+    double a2 = 1.0 - a1;
 
-    A[1][0] = W.ro1*(W.u1 - UI)/W.a1;
-    A[1][1] = W.u1;
-    A[1][2] = W.ro1;
+    double u1_n = is_X_dir ? W.u1 : W.v1;
+    double u2_n = is_X_dir ? W.u2 : W.v2;
+    
+    double UI = is_X_dir ? f_UI_x(W) : f_UI_y(W); 
+    double PI = f_PI(W); 
 
-    A[2][0] = (W.P1 - PI)/(W.a1*W.ro1);
-    A[2][2] = W.u1;
-    A[2][3] = 1.0 / W.ro1;
+    double CI1_sq = f_C2(PI, W.ro1, phases.p1); // c_I^2
+    double CI2_sq = f_C2(PI, W.ro2, phases.p2);
+    double C1_sq  = f_C2(W.P1, W.ro1, phases.p1); // c^2
+    double C2_sq  = f_C2(W.P2, W.ro2, phases.p2);
 
-    A[3][0] = W.ro1*CI1*CI1*(W.u1 - UI) / W.a1;
-    A[3][2] = W.ro1 * C1*C1;
-    A[3][3] = W.u1;
 
-    A[4][0] = - W.ro2*(W.u2 - UI)/a2;
-    A[4][4] = W.u2;
-    A[4][5] = W.ro2;
+    result[0] = UI * dW[0];
 
-    A[5][0] = - (W.P2 - PI)/(a2*W.ro2);
-    A[5][5] = W.u2;
-    A[5][6] = 1.0 / W.ro2;
+    if (is_X_dir) {
+       
+        result[1] = (W.ro1 * (u1_n - UI) / a1) * dW[0] + u1_n * dW[1] + W.ro1 * dW[2];
+        result[2] = ((W.P1 - PI) / (a1 * W.ro1)) * dW[0] + u1_n * dW[2] + (1.0 / W.ro1) * dW[4];
+        result[3] = u1_n * dW[3];
+        result[4] = (W.ro1 * CI1_sq * (u1_n - UI) / a1) * dW[0] + (W.ro1 * C1_sq) * dW[2] + u1_n * dW[4];
+        result[5] = (-W.ro2 * (u2_n - UI) / a2) * dW[0] + u2_n * dW[5] + W.ro2 * dW[6];
+        result[6] = (-(W.P2 - PI) / (a2 * W.ro2)) * dW[0] + u2_n * dW[6] + (1.0 / W.ro2) * dW[8];
+        result[7] = u2_n * dW[7];
+        result[8] = (-W.ro2 * CI2_sq * (u2_n - UI) / a2) * dW[0] + (W.ro2 * C2_sq) * dW[6] + u2_n * dW[8];
+    } 
+    else {
 
-    A[6][0] = - (W.ro2*CI2*CI2)*(W.u2 - UI)/a2;
-    A[6][5] = W.ro2*C2*C2;
-    A[6][6] = W.u2;
-
-    for(int i = 0; i < 7; ++i)
-    {
-        for(int j = 0; j < 0; ++j)
-            result[i] += A[i][j]*(WR[j]-WL[j]);
-
+        result[1] = (W.ro1 * (u1_n - UI) / a1) * dW[0] + u1_n * dW[1] + W.ro1 * dW[3]; 
+        result[2] = u1_n * dW[2];
+        result[3] = ((W.P1 - PI) / (a1 * W.ro1)) * dW[0] + u1_n * dW[3] + (1.0 / W.ro1) * dW[4];
+        result[4] = (W.ro1 * CI1_sq * (u1_n - UI) / a1) * dW[0] + (W.ro1 * C1_sq) * dW[3] + u1_n * dW[4];
+        result[5] = (-W.ro2 * (u2_n - UI) / a2) * dW[0] + u2_n * dW[5] + W.ro2 * dW[7];
+        result[6] = u2_n * dW[6];
+        result[7] = (-(W.P2 - PI) / (a2 * W.ro2)) * dW[0] + u2_n * dW[7] + (1.0 / W.ro2) * dW[8];
+        result[8] = (-W.ro2 * CI2_sq * (u2_n - UI) / a2) * dW[0] + (W.ro2 * C2_sq) * dW[7] + u2_n * dW[8];
     }
 
     return result;
+
 }
 
 void MUSCL::MUSCL_Operator(const Mesh& mesh, bool is_X_dir, double dt, const Components& phases)
@@ -100,14 +98,14 @@ void MUSCL::MUSCL_Operator(const Mesh& mesh, bool is_X_dir, double dt, const Com
         if(mesh.Faces[mesh.Cells[i].faces_ID[face_dirs[0]]].type != 0)
         {
             R_id = mesh.Faces[mesh.Cells[i].faces_ID[face_dirs[1]]].Right_ID;
-            d_L = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+            d_L = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
             d_R = mesh.Cells[R_id].W - mesh.Cells[i].W;
         }
         else if(mesh.Faces[mesh.Cells[i].faces_ID[face_dirs[1]]].type != 0)
         {
             L_id = mesh.Faces[mesh.Cells[i].faces_ID[face_dirs[0]]].Left_ID;
             d_L = mesh.Cells[i].W - mesh.Cells[L_id].W;
-            d_R = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+            d_R = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         }
         else
         {
@@ -122,7 +120,7 @@ void MUSCL::MUSCL_Operator(const Mesh& mesh, bool is_X_dir, double dt, const Com
         W_L[i] = mesh.Cells[i].W - 0.5 * slope;
         W_R[i] = mesh.Cells[i].W + 0.5 * slope;
                
-        AWprod = A_prod_W(mesh.Cells[i].W, W_L[i], W_R[i], phases);
+        AWprod = A_prod_W(mesh.Cells[i].W, is_X_dir, W_L[i], W_R[i], phases);
 
         W_L[i] = W_L[i] - (0.5*dt/h) * AWprod;
         W_R[i] = W_R[i] - (0.5*dt/h) * AWprod;

@@ -17,8 +17,6 @@ private:
     const double B;
     std::vector<StateW> W_L;
     std::vector<StateW> W_R;
-    //std::vector<StateW> W_ex_L;
-    //std::vector<StateW> W_ex_R;
 
 public:
     
@@ -30,6 +28,6 @@ public:
 private:
 
     StateW slopLimiter(const StateW& dL, const StateW& dR);
-    StateW A_prod_W(const StateW& W, const StateW& WL, const StateW& WR, const Components& phases);
+    StateW A_prod_W(const StateW& W, bool is_X_dir, const StateW& WL, const StateW& WR, const Components& phases);
 };
 
