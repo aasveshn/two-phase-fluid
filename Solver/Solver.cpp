@@ -13,7 +13,8 @@ Solver::Solver(Mesh& msh):mesh(msh),
                                        Cp_water_liquid,
                                        q_water_liquid,
                                        qs_water_liquid)), 
-                           HyperbolicOp(msh, phases) {}
+                           HyperbolicOp(msh, phases),
+                           RelaxationOp(msh, phases){}
 
 double Solver::compute_dt()
 {
