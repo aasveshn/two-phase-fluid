@@ -64,7 +64,7 @@ void Mesh::SetInitialCondidions()
     u1L = 0;
     v1L = 0;
     P1L = 100000000.0;
-    ro2L = 1150;
+    ro2L = 500;
     u2L = 0;
     v2L = 0;
     P2L = 100000000.0;
@@ -74,7 +74,7 @@ void Mesh::SetInitialCondidions()
     u1R = 0;
     v1R = 0;
     P1R = 100000.0;
-    ro2R = 1150;
+    ro2R = 500;
     u2R = 0;
     v2R = 0;
     P2R = 100000.0;
