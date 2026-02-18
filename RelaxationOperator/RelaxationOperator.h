@@ -18,8 +18,9 @@ private:
 
 public:
 
-    RelaxationOperator(Mesh& mesh, const Components& comp);
+    RelaxationOperator(Mesh& msh, const Components& comp);
     void Relax();
+    
 private:
     void VelocityRelaxation(Cell& cell);
     void PressureRelaxation(Cell& cell);
