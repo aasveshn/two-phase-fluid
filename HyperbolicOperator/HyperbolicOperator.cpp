@@ -88,17 +88,20 @@ void HyperbolicOperator::GodunovStep(bool is_X_dir, double dt)
         W.P2 = P_ro_e(W.ro2, e2_new, phases.p2);
     }
 }
-                                                                
-void HyperbolicOperator::HyperbolicStep(double dt)
+   
+void HyperbolicOperator::HyperbolicStepX(double dt)
 {
-    //X step
+
     muscl.MUSCL_Operator(mesh, true, dt, phases);
     rieamn.HLLC(mesh, muscl.getW_L(), muscl.getW_R(), mesh.VertToHoriz, true, phases);
-    GodunovStep(true, dt);
-    
-    //Y step
+    GodunovStep(true, dt);     
+
+} 
+
+void HyperbolicOperator::HyperbolicStepY(double dt)
+{
     muscl.MUSCL_Operator(mesh, false, dt, phases);
     rieamn.HLLC(mesh, muscl.getW_L(), muscl.getW_R(), mesh.VertToHoriz, false, phases);
     GodunovStep(false, dt);
 
-}                                                                           
+} 
