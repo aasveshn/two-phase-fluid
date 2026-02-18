@@ -54,30 +54,30 @@ Mesh::Mesh(std::string filename)
 //Необходима реализация
 void Mesh::SetInitialCondidions()
 {
-    unsigned int discontinuity = 100; //100
+    unsigned int discontinuity = 600; //100
     double a1L, ro1L, u1L, v1L, P1L, ro2L, u2L, v2L, P2L,
            a1R, ro1R, u1R, v1R, P1R, ro2R, u2R, v2R, P2R;
     double WL[7];
 //Сделать чтение из файла?
-    a1L = 0.5;
-    ro1L = 1150;
-    u1L = 1;
+    a1L = 1e-6;
+    ro1L = 2;
+    u1L = 0;
     v1L = 0;
-    P1L = 100000;
+    P1L = 100000000.0;
     ro2L = 1150;
-    u2L = 1;
+    u2L = 0;
     v2L = 0;
-    P2L = 100000;
+    P2L = 100000000.0;
 
-    a1R = 0.5;
-    ro1R = 1150;
+    a1R = 1-1e-6;
+    ro1R = 2;
     u1R = 0;
     v1R = 0;
-    P1R = 100000;
+    P1R = 100000.0;
     ro2R = 1150;
     u2R = 0;
     v2R = 0;
-    P2R = 100000;
+    P2R = 100000.0;
 
 
     StateW stateL(a1L, ro1L, u1L, v1L, P1L, ro2L, u2L, v2L, P2L);
