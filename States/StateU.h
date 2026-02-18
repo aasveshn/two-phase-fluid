@@ -5,12 +5,11 @@
 #include "../Components/Components.h"
 
 struct StateU {
-    // Используем union для доступа и по именам, и по индексу
     union {
         struct {
             double ar1, aru1, arv1, arE1, ar2, aru2,arv2, arE2;  
         };
-        double v[6]; 
+        double v[8]; 
     };
 
     
