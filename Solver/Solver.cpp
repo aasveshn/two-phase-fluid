@@ -1,18 +1,18 @@
 #include "Solver.h"
 
 Solver::Solver(Mesh& msh):mesh(msh),
-                          phases(Phase(gamma_water_vapor,
-                                       P0_water_vapor,
-                                       Cv_water_vapor,
-                                       Cp_water_vapor,
-                                       q_water_vapor,
-                                       qs_water_vapor),
-                                 Phase(gamma_water_liquid,
-                                       P0_water_liquid,
-                                       Cv_water_liquid,
-                                       Cp_water_liquid,
-                                       q_water_liquid,
-                                       qs_water_liquid)), 
+                          phases(Phase(gamma_dodecane_vapor,
+                                       P0_dodecane_vapor,
+                                       Cv_dodecane_vapor,
+                                       Cp_dodecane_vapor,
+                                       q_dodecane_vapor,
+                                       qs_dodecane_vapor),
+                                 Phase(gamma_dodecane_liquid,
+                                       P0_dodecane_liquid,
+                                       Cv_dodecane_liquid,
+                                       Cp_dodecane_liquid,
+                                       q_dodecane_liquid,
+                                       qs_dodecane_liquid)), 
                            HyperbolicOp(msh, phases),
                            RelaxationOp(msh, phases){}
 
@@ -84,17 +84,21 @@ void Solver::Solve()
         return;
     }
 
-   
-   //1500   
     while(time < T)
     {
-        HyperbolicOp.HyperbolicStep(dt);
+        RelaxationOp.Relax();
+        HyperbolicOp.HyperbolicStepX(dt*0.5);
+        RelaxationOp.Relax();
+        HyperbolicOp.HyperbolicStepY(dt);
+        RelaxationOp.Relax();
+        HyperbolicOp.HyperbolicStepX(dt*0.5);
+        RelaxationOp.Relax();
         time += dt;
         dt = compute_dt();
-        std::cout<<time<<"\n";
         ++step;
-        if(step == 50)
-            break;
+        std::cout<<time<<"\n";
+        if(time + dt > T)
+            dt = T - time;
     }
 
 
