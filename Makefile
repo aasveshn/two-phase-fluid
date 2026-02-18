@@ -13,6 +13,7 @@ SRC = main.cpp \
       MUSCL/MUSCL.cpp \
       RiemanSolver/RiemanSolver.cpp \
       HyperbolicOperator/HyperbolicOperator.cpp \
+      RelaxationOperator/RelaxationOperator.cpp \
       Solver/Solver.cpp
 
 OBJ = $(SRC:.cpp=.o)
