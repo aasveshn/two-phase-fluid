@@ -91,6 +91,73 @@ void RelaxationOperator::PressureRelaxation(Cell& cell)
 
 }
 
+
+
+void RelaxationOperator::PressureTemperatureRelaxation(Cell& cell)
+{
+    StateW& W = cell.W;
+    const Phase& p1 = phases.p1;
+    const Phase& p2 = phases.p2;
+    double a2 = 1 - W.a1;
+    double PI = f_PI(W);
+
+    double al_1 = p1.Cv*(p1.gamma-1)*W.a1*W.ro1;
+    double al_2 = p2.Cv*(p2.gamma-1)*a2*W.ro2;
+    
+    double L = W.a1*((W.P1 + p1.gamma*p1.P0)/(p1.gamma-1)) + a2 * ((W.P2 + p2.gamma*p2.P0)/(p2.gamma-1));
+
+    double a = (1.0 / (p1.gamma - 1) + (al_2/al_1) * (1.0/(p2.gamma-1)));
+    double b = ((p2.P0 + p1.gamma*p1.P0)/(p1.gamma-1) - L + (al_2/al_1)*((p1.P0 + p2.gamma*p2.P0)/(p2.gamma-1) - L));
+    double c = (p1.gamma*p1.P0*p2.P0)/(p1.gamma-1) - L*p2.P0 + (al_2/al_1)*((p2.gamma*p2.P0*p1.P0)/(p2.gamma-1) -L*p1.P0);
+    double D = b*b - 4.0 * a * c;
+
+    double x1, x2;
+
+    if(D >= 0)
+    {
+        x1 = 0.5*(-b + std::sqrt(D))/a;
+        x2 = 0.5*(-b - std::sqrt(D))/a;
+    }
+    else
+    {
+        std::cout<<"ERROR PRESS TEMP RELAX D < 0 ! \n";
+        return;
+    }
+
+    double ak0 = p1.Cv*(p1.gamma - 1)*W.a1*W.ro1;
+    double ak0_x1 = 1.0/(1.0 + (al_2/al_1) * ((x1 + p1.P0)/(x1 + p2.P0)));
+    double ak0_x2 = 1.0/(1.0 + (al_2/al_1) * ((x2 + p1.P0)/(x2 + p2.P0)));
+
+    double a1_x1 = ak0_x1;
+    double a2_x1 = 1 - a1_x1;
+    double a1_x2 = ak0_x2;
+    double a2_x2 = 1 - a1_x2;
+
+    double a1_new, P_eq;
+    
+    if((a1_x1 < 1 && a1_x1 > 0) && x1 > 0)
+    {
+        a1_new = a1_x1;
+        P_eq = x1;
+    }
+    else if((a1_x2 < 1 && a1_x2 > 0) && x2 > 0)
+    {
+        a1_new = a1_x2;
+        P_eq = x2;
+    }
+    else
+    {
+        std::cout<<"ERROR VOLUME FRACTION P&T RELAXATION \n";
+        return;
+    }
+
+    W.ro1 = W.a1*W.ro1/a1_new;
+    W.ro2 = a2*W.ro2/(1-a1_new);
+    W.a1 = a1_new;
+    W.P1 = P_eq;
+    W.P2 = P_eq;
+}
+
 void RelaxationOperator::Relax()
 {
 
@@ -98,5 +165,7 @@ void RelaxationOperator::Relax()
     {
         VelocityRelaxation(mesh.Cells[i]);
         PressureRelaxation(mesh.Cells[i]);
+        if(mesh.Cells[i].is_Interface())
+            PressureTemperatureRelaxation(mesh.Cells[i]);
     }
 }

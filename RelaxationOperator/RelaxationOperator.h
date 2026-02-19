@@ -24,5 +24,6 @@ public:
 private:
     void VelocityRelaxation(Cell& cell);
     void PressureRelaxation(Cell& cell);
+    void PressureTemperatureRelaxation(Cell& cell);
     
 };
