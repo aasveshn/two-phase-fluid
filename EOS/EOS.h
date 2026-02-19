@@ -94,9 +94,16 @@ inline double E(double e, double u, double v)
     return e + (u*u + v*v)*0.5;
 };
 
-inline double g(double ro, double e, const Phase& ph)
+inline double g_ro_e(double ro, double e, const Phase& ph)
 {
     double P = P_ro_e(ro, e, ph);
+    double T = T_ro_e(ro, e, ph);
+    return e + P/ro - T*S_P_T(P, T, ph);
+}
+
+inline double g_P_ro(double P, double ro, const Phase& ph)
+{
+    double e = e_P_ro(ro, P, ph);
     double T = T_ro_e(ro, e, ph);
     return e + P/ro - T*S_P_T(P, T, ph);
 }
