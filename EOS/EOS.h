@@ -103,7 +103,7 @@ inline double g_ro_e(double ro, double e, const Phase& ph)
 
 inline double g_P_ro(double P, double ro, const Phase& ph)
 {
-    double e = e_P_ro(ro, P, ph);
+    double e = e_P_ro(P, ro, ph);
     double T = T_ro_e(ro, e, ph);
     return e + P/ro - T*S_P_T(P, T, ph);
 }
@@ -134,4 +134,10 @@ inline double f_UI_y(const StateW& state)
 {
     return (state.a1*state.ro1*state.v1 + (1.0-state.a1)*state.ro2*state.v2)
             /(state.a1*state.ro1 + (1.0-state.a1)*state.ro2);
+}
+
+inline double T_from_P(double P, double m1, double m2, const Components& comp)
+{
+    return 1.0 / (m1 * comp.p1.Cv*(comp.p1.gamma-1.0)/(P+comp.p1.P0) 
+                + m2 * comp.p2.Cv*(comp.p2.gamma-1.0)/(P+comp.p2.P0));
 }
