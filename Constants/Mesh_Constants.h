@@ -1,10 +1,10 @@
 #pragma once
 //CFL
-const double CFL = 0.3;
+const double CFL = 0.01;
 // cell constants
-const double dx = 0.00125;
-const double dy = 0.005;
+const double dx = 0.001;
+const double dy = 0.01;
 //Slope limiter
 const double betta = 1.0;
 //final time 
-const double T = 0.000473;
+const double t_end = 0.000473;
