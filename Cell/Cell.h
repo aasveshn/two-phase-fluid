@@ -22,5 +22,7 @@ public:
     
     Cell(unsigned int id, unsigned int i_index, unsigned int j_index, const unsigned int (&faces_id)[4]);
     Cell(const Cell& other);
+
+    bool is_Interface();
     
 };

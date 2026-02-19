@@ -18,3 +18,8 @@ Cell::Cell(const Cell& other)
       j(other.j), 
       faces_ID{other.faces_ID[0], other.faces_ID[1], other.faces_ID[2], other.faces_ID[3]},
       W(other.W){}
+
+bool Cell::is_Interface()
+{
+  return W.a1 > 1e-4 && W.a1 < 1-1e-4;
+}
