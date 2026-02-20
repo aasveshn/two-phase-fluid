@@ -8,6 +8,8 @@
 
 #include "../Cell/Cell.h"
 #include "../Face/Face.h"
+#include "../EOS/EOS.h"
+#include "../Components/Components.h"
 
 class Mesh{
 
@@ -19,5 +21,5 @@ public:
     unsigned int VertToHoriz;
 
     Mesh(std::string filename);
-    void SetInitialCondidions();
+    void SetInitialCondidions(const Components& phases);
 };
