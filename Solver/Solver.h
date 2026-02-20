@@ -19,6 +19,7 @@ private:
 
 public:
     Solver(Mesh& msh);
+    const Components& getPhases();
     void Solve();
 private:
     double compute_dt();

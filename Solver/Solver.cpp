@@ -84,7 +84,7 @@ void Solver::Solve()
         return;
     }
 
-    while(time < T)
+    while(time < t_end)
     {
         RelaxationOp.Relax();
         HyperbolicOp.HyperbolicStepX(dt*0.5);
@@ -96,9 +96,9 @@ void Solver::Solve()
         time += dt;
         dt = compute_dt();
         ++step;
-        std::cout<<time<<"\n";
-        if(time + dt > T)
-            dt = T - time;
+        std::cout<<time<<" "<<step<<"\n";
+        if(time + dt > t_end)
+            dt = t_end - time;
     }
 
 
@@ -116,5 +116,9 @@ void Solver::Solve()
 
     f_a1.close(); f_ro1.close(); f_u1.close(); f_v1.close(); f_P1.close();
     f_ro2.close(); f_u2.close(); f_v2.close(); f_P2.close();
-    
+}
+
+const Components& Solver::getPhases()
+{
+    return phases;
 }

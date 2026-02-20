@@ -11,10 +11,8 @@
 int main()
 {
 	Mesh mesh("input/mesh.txt");
-	mesh.SetInitialCondidions();
-	//Solver solver(mesh);
-	//solver.Solve();
 	auto solver = std::make_unique<Solver>(mesh);
+	mesh.SetInitialCondidions(solver->getPhases());
 	solver -> Solve();
 		
 	return 0;

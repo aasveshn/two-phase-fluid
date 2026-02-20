@@ -477,11 +477,11 @@ double RelaxationOperator::SolveTemperature(double P, double T0, double tol, int
 {
 
     double T = T0;
-    for(int i = 200; i < 1000; ++i)
+    for(int i = 200; i < 1000; i=i+20)
     {
-        if(Fdg(P, i)*Fdg(P, i + 10) < 0)
+        if(Fdg(P, i)*Fdg(P, i + 20) < 0)
         {
-            T = i+5;
+            T = i+10;
             break;
         }
     }
@@ -499,7 +499,6 @@ double RelaxationOperator::SolveTemperature(double P, double T0, double tol, int
             return T;
         }
     }
-    std::cout << T<<" "<<T0 <<" "<<P<<"\n";
     throw std::runtime_error("method did not converge within the maximum number of iterations.");
 }
 
@@ -516,7 +515,7 @@ void RelaxationOperator::Relax()
        if(mesh.Cells[i].is_Interface())
         {
            double T = T_ro_P(mesh.Cells[i].W.ro1, mesh.Cells[i].W.P1, phases.p1);
-            double Tsat = SolveTemperature(mesh.Cells[i].W.P1, T, 1e-3, 1000);
+            double Tsat = SolveTemperature(mesh.Cells[i].W.P1, T, 1e-2, 1000);
             if(T > Tsat)
             {
                GibbsFreeEnergyRelaxation(mesh.Cells[i]);
