@@ -1,4 +1,3 @@
-## Построение графиков в разных окнах
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
@@ -11,11 +10,22 @@ OUTPUT_DIR = "../output"
 DX = 0.0004
 DY = 0.0005
 
-def load_data(filename):
+def load_last_line(filename):
+
     path = os.path.join(OUTPUT_DIR, filename)
     if not os.path.exists(path):
         raise FileNotFoundError(f"Файл не найден: {path}")
-    return np.loadtxt(path)
+    
+    last_line = ""
+    with open(path, 'r') as f:
+        for line in f:
+            if line.strip():  
+                last_line = line
+    
+    if not last_line:
+        raise ValueError(f"Файл {filename} пуст")
+        
+    return np.fromstring(last_line, sep=' ')
 
 def plot_physical_results_log():
     mesh_path = os.path.join(INPUT_DIR, "mesh.txt")
@@ -34,17 +44,18 @@ def plot_physical_results_log():
             cells_map.append((int(line[1]), int(line[2])))
 
     try:
-        a1  = load_data("a1.txt")
-        p1  = load_data("P1.txt")
-        ro1 = load_data("ro1.txt")
-        u1  = load_data("u1.txt")
-        v1  = load_data("v1.txt")
-        ro2 = load_data("ro2.txt")
-        u2  = load_data("u2.txt")
-        v2  = load_data("v2.txt")
+        a1  = load_last_line("a1.txt")
+        p1  = load_last_line("P1.txt")
+        ro1 = load_last_line("ro1.txt")
+        u1  = load_last_line("u1.txt")
+        v1  = load_last_line("v1.txt")
+        ro2 = load_last_line("ro2.txt")
+        u2  = load_last_line("u2.txt")
+        v2  = load_last_line("v2.txt")
     except Exception as e:
         print(f"Ошибка загрузки данных: {e}")
         return
+
 
     a2 = 1.0 - a1
     m1 = a1 * ro1
@@ -58,10 +69,13 @@ def plot_physical_results_log():
     v_mix = (m1 * v1 + m2 * v2) / m_sum
     vel_mag = np.sqrt(u_mix**2 + v_mix**2)
 
+
     def to_grid(data_array):
         grid = np.full((ny_total, nx_total), np.nan)
         for idx, (i, j) in enumerate(cells_map):
-            grid[j, i] = data_array[idx]
+
+            if idx < len(data_array):
+                grid[j, i] = data_array[idx]
         return grid
 
     grid_p = to_grid(p_bar)
@@ -71,96 +85,69 @@ def plot_physical_results_log():
 
     physical_extent = [0, nx_total * DX, 0, ny_total * DY]
 
-
     plt.figure(figsize=(8, 6))
-
     p_min = np.nanmin(grid_p)
     p_max = np.nanmax(grid_p)
-    if p_min <= 0:
-        p_min = 1e-6
+    if p_min <= 0: p_min = 1e-6
 
-    norm_p = colors.LogNorm(vmin=p_min, vmax=p_max)
     im1 = plt.imshow(grid_p, origin='lower', cmap='jet',
-                 extent=physical_extent, norm=norm_p)
-
+                     extent=physical_extent, norm=colors.LogNorm(vmin=p_min, vmax=p_max))
     cbar1 = plt.colorbar(im1)
-
-
+    
     log_min = int(np.floor(np.log10(p_min)))
     log_max = int(np.ceil(np.log10(p_max)))
-
-    ticks = []
-    for n in range(log_min, log_max + 1):
-        for m in range(1, 10):
-            value = m * 10**n
-            if p_min <= value <= p_max:
-                ticks.append(value)
-
+    ticks = [m * 10**n for n in range(log_min, log_max + 1) for m in range(1, 10) if p_min <= m * 10**n <= p_max]
     cbar1.set_ticks(ticks)
     cbar1.set_ticklabels([f"{t:.1f}".rstrip('0').rstrip('.') for t in ticks])
 
-    plt.title("Давление , бар")
+    plt.title("Давление (последний шаг), бар")
     plt.xlabel("x, м")
     plt.ylabel("y, м")
     plt.gca().set_aspect('equal')
     plt.tight_layout()
-    plt.show()
-
 
     plt.figure(figsize=(8, 6))
-
     r_min = np.nanmin(grid_r)
     r_max = np.nanmax(grid_r)
-    if r_min <= 0:
-        r_min = 1e-6
+    if r_min <= 0: r_min = 1e-6
 
-    norm_r = colors.LogNorm(vmin=r_min, vmax=r_max)
     im2 = plt.imshow(grid_r, origin='lower', cmap='jet',
-                    extent=physical_extent, norm=norm_r)
-
+                    extent=physical_extent, norm=colors.LogNorm(vmin=r_min, vmax=r_max))
     cbar2 = plt.colorbar(im2)
-
+    
     log_min = int(np.floor(np.log10(r_min)))
     log_max = int(np.ceil(np.log10(r_max)))
-
-    ticks = []
-    for n in range(log_min, log_max + 1):
-        for m in range(1, 10):
-            value = m * 10**n
-            if r_min <= value <= r_max:
-                ticks.append(value)
-
+    ticks = [m * 10**n for n in range(log_min, log_max + 1) for m in range(1, 10) if r_min <= m * 10**n <= r_max]
     cbar2.set_ticks(ticks)
     cbar2.set_ticklabels([f"{t:.1f}".rstrip('0').rstrip('.') for t in ticks])
 
-    plt.title(r"Плотность смеси , кг/м$^3$")
+    plt.title(r"Плотность смеси (последний шаг), кг/м$^3$")
     plt.xlabel("x, м")
     plt.ylabel("y, м")
     plt.gca().set_aspect('equal')
     plt.tight_layout()
-    plt.show()
-
 
     plt.figure(figsize=(8, 6))
     im3 = plt.imshow(grid_v, origin='lower', cmap='jet',
                      extent=physical_extent, vmin=0, vmax=150)
-    plt.title("Модуль скорости смеси, м/с")
+    plt.title("Модуль скорости смеси (последний шаг), м/с")
     plt.xlabel("x, м")
     plt.ylabel("y, м")
     plt.gca().set_aspect('equal')
     plt.colorbar(im3)
     plt.tight_layout()
-    plt.show()
+
 
     plt.figure(figsize=(8, 6))
     im4 = plt.imshow(grid_a, origin='lower', cmap='jet',
                      extent=physical_extent, vmin=0, vmax=1)
-    plt.title(r"Объемная доля газа ")
+    plt.title(r"Объемная доля газа $\alpha_1$ (последний шаг)")
     plt.xlabel("x, м")
     plt.ylabel("y, м")
     plt.gca().set_aspect('equal')
     plt.colorbar(im4)
     plt.tight_layout()
+
     plt.show()
 
 if __name__ == "__main__":
