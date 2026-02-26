@@ -15,11 +15,10 @@ chamber_length = 0.050  # длина камеры
 chamber_height = 0.02  # высота камеры
 
 # типы граней 
-TYPE_INTERNAL = 0 #внутреняя
-TYPE_WALL     = 1 # стена (в трубе и слева в камере)
-TYPE_INLET    = 2  # слева в трубе
-TYPE_OUTLET   = 3  # справа в камере
-
+TYPE_INTERNAL = 0 # внутренняя
+TYPE_WALL     = 1 # стена 
+TYPE_INLET    = 2 # вход 
+TYPE_OUTLET   = 3 # выход 
 
 nx_pipe = int(round(pipe_length / dx))
 ny_pipe = int(round(pipe_height / dy))
@@ -27,14 +26,12 @@ ny_pipe = int(round(pipe_height / dy))
 nx_chamber = int(round(chamber_length / dx))
 ny_chamber = int(round(chamber_height / dy))
 
-
 nx_total = nx_pipe + nx_chamber
 ny_total = max(ny_pipe, ny_chamber)
 
 
 pipe_y_start = (ny_total - ny_pipe) // 2
 pipe_y_end = pipe_y_start + ny_pipe
-
 
 cell_map = np.full((nx_total, ny_total), -1, dtype=int)
 cell_list = []
@@ -44,11 +41,9 @@ for i in range(nx_total):
     for j in range(ny_total):
         is_fluid = False
         
-
         if i < nx_pipe:
             if pipe_y_start <= j < pipe_y_end:
                 is_fluid = True
-    
         else:
             if 0 <= j < ny_chamber:
                 is_fluid = True
@@ -60,10 +55,8 @@ for i in range(nx_total):
 
 num_cells = cell_id_counter
 
-
 faces_list = [] # (id, L_cell, R_cell, is_vertical, type)
 face_id_counter = 0
-
 
 cell_faces = {cid: [-1, -1, -1, -1] for cid in range(num_cells)}
 
@@ -77,9 +70,12 @@ for i in range(nx_total + 1):
         
         f_type = TYPE_INTERNAL
         if L_cid == -1 or R_cid == -1:
-            if i == 0: f_type = TYPE_INLET
-            elif i == nx_total: f_type = TYPE_OUTLET
-            else: f_type = TYPE_WALL
+            if i == 0: 
+                f_type = TYPE_INLET 
+            elif i == nx_total: 
+                f_type = TYPE_OUTLET
+            else: 
+                f_type = TYPE_WALL 
         
         fid = face_id_counter
         faces_list.append((fid, L_cid, R_cid, 1, f_type)) 
@@ -87,7 +83,6 @@ for i in range(nx_total + 1):
         if L_cid != -1: cell_faces[L_cid][1] = fid
         if R_cid != -1: cell_faces[R_cid][0] = fid
         face_id_counter += 1
-
 
 for i in range(nx_total):
     for j in range(ny_total + 1):
@@ -98,7 +93,11 @@ for i in range(nx_total):
         
         f_type = TYPE_INTERNAL
         if B_cid == -1 or T_cid == -1:
-            f_type = TYPE_WALL 
+
+            if i >= nx_pipe:
+                f_type = TYPE_OUTLET
+            else:
+                f_type = TYPE_WALL 
             
         fid = face_id_counter
         faces_list.append((fid, B_cid, T_cid, 0, f_type)) 
@@ -109,13 +108,9 @@ for i in range(nx_total):
 
 num_faces = face_id_counter
 
-
 with open("../mesh.txt", "w") as f:
-
     f.write(f"{nx_total} {ny_total} {num_cells} {num_faces}\n")
     
-    
-   
     for cid, i, j in cell_list:
         fids = cell_faces[cid]
         f.write(f"{cid} {i} {j} {fids[0]} {fids[1]} {fids[2]} {fids[3]}\n")
