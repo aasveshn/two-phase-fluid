@@ -11,6 +11,7 @@
 #include "../Mesh/Mesh.h"
 #include "../Components/Components.h"
 #include "../EOS/EOS.h"
+#include "../Constants/Initial_Conditions.h"
 
 class RiemanSolver{
 

@@ -21,14 +21,72 @@ void RiemanSolver::HLLC(const Mesh& mesh, const std::vector<StateW>& WL_in, cons
 
     for(unsigned int i = interval_L; i < N; ++i)
     {
+
         int idx_L = mesh.Faces[i].Left_ID;
         int idx_R = mesh.Faces[i].Right_ID;
- 
-        if(idx_L == -1) idx_L = idx_R;
-        else if(idx_R == -1) idx_R = idx_L;
 
-        const StateW& WL = WR_in[idx_L];
-        const StateW& WR = WL_in[idx_R];
+        StateW WL;
+        StateW WR;
+ 
+        if(idx_L == -1)
+        {
+            idx_L = idx_R;
+            WL = WL_in[idx_L];
+            WR = WL_in[idx_R];
+            
+            
+        } 
+        else if(idx_R == -1) 
+        {
+            idx_R = idx_L;
+            WR = WR_in[idx_R];
+            WL = WR_in[idx_L];
+        }
+        else
+        {
+            WL = WR_in[idx_L];
+            WR = WL_in[idx_R];
+        }
+        
+
+        
+
+        if(mesh.Faces[i].type == 1)
+        {
+            if(mesh.Faces[i].Left_ID == -1)
+            {
+                
+                if(is_X_dir)
+                {
+                    WL.u1 = -WL.u1;
+                    WL.u2 = -WL.u2;
+                }
+                else
+                {
+                    WL.v1 = -WL.v1;
+                    WL.v2 = -WL.v2;
+                }
+            }
+            else
+            {
+                
+                if(is_X_dir)
+                {
+                    WR.u1 = -WR.u1;
+                    WR.u2 = -WR.u2;
+                }
+                else
+                {
+                    WR.v1 = -WR.v1;
+                    WR.v2 = -WR.v2;
+                }
+            }
+
+        }
+        if(mesh.Faces[i].type == 2)
+        {
+            WL = StateW(a1L0, ro1L0, u1L0, v1L0, P1L0, ro2L0, u2L0, v2L0, P2L0);
+        }
 
         double a1L = WL.a1; double a2L = 1.0 - a1L;
         double a1R = WR.a1; double a2R = 1.0 - a1R;
