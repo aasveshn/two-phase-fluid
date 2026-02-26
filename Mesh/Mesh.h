@@ -10,6 +10,7 @@
 #include "../Face/Face.h"
 #include "../EOS/EOS.h"
 #include "../Components/Components.h"
+#include "../Constants/Initial_Conditions.h"
 
 class Mesh{
 
