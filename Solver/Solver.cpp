@@ -108,13 +108,28 @@ void Solver::Solve()
 
     while(time < t_end)
     {
-        RelaxationOp.Relax();
-        HyperbolicOp.HyperbolicStepX(dt*0.5);
-        RelaxationOp.Relax();
-        HyperbolicOp.HyperbolicStepY(dt);
-        RelaxationOp.Relax();
-        HyperbolicOp.HyperbolicStepX(dt*0.5);
-        RelaxationOp.Relax();
+       
+        if(step % 2 == 0)
+        {
+            RelaxationOp.Relax();
+            HyperbolicOp.HyperbolicStepX(dt*0.5);
+            RelaxationOp.Relax();
+            HyperbolicOp.HyperbolicStepY(dt);
+            RelaxationOp.Relax();
+            HyperbolicOp.HyperbolicStepX(dt*0.5);
+            RelaxationOp.Relax();
+        }
+        else
+        {
+            RelaxationOp.Relax();
+            HyperbolicOp.HyperbolicStepY(dt*0.5);
+            RelaxationOp.Relax();
+            HyperbolicOp.HyperbolicStepX(dt);
+            RelaxationOp.Relax();
+            HyperbolicOp.HyperbolicStepY(dt*0.5);
+            RelaxationOp.Relax();
+        }
+        
         time += dt;
 
 
