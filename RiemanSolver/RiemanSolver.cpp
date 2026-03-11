@@ -1,6 +1,6 @@
 #include "RiemanSolver.h"
 
-RiemanSolver::RiemanSolver(unsigned int N, unsigned int k): Flux_X(k+1), Flux_Y(N-k){};
+RiemanSolver::RiemanSolver(unsigned int N, unsigned int k): Flux_X(k+1), Flux_Y(N-k-1){};
 
 void RiemanSolver::HLLC(const Mesh& mesh, const std::vector<StateW>& WL_in, const std::vector<StateW>& WR_in,  
                         unsigned int H_idx, bool is_X_dir, const Components& phases)
@@ -14,9 +14,9 @@ void RiemanSolver::HLLC(const Mesh& mesh, const std::vector<StateW>& WL_in, cons
         N = H_idx+1; 
         k = 0;
     } else {
-        interval_L = H_idx;
+        interval_L = H_idx+1;
         N = mesh.Faces.size(); 
-        k = H_idx;
+        k = H_idx+1;
     }
 
     for(unsigned int i = interval_L; i < N; ++i)
@@ -209,7 +209,7 @@ void RiemanSolver::HLLC(const Mesh& mesh, const std::vector<StateW>& WL_in, cons
                 flux[i-k][0] = UR[2]; 
                 flux[i-k][1] = UR[2]*WR.u1;
                 flux[i-k][2] = UR[2]*WR.v1 + a1R*WR.P1; 
-                flux[i-k][3] = (UR[7] + a1R*WR.P1)*WR.v1;
+                flux[i-k][3] = (UR[3] + a1R*WR.P1)*WR.v1;
                 flux[i-k][4] = UR[6]; 
                 flux[i-k][5] = UR[6]*WR.u2; 
                 flux[i-k][6] = UR[6]*WR.v2 + a2R*WR.P2; 

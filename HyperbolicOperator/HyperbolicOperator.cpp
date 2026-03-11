@@ -12,13 +12,13 @@ void HyperbolicOperator::GodunovStep(bool is_X_dir, double dt)
     unsigned int face_dirs[2];
     double h;
     unsigned int k;
-    
+        
     if(is_X_dir) {
         face_dirs[0] = 0; face_dirs[1] = 1;
         h = dx; k = 0;
     } else {
         face_dirs[0] = 2; face_dirs[1] = 3;
-        h = dy; k = mesh.VertToHoriz;
+        h = dy; k = mesh.VertToHoriz+1;
     }
 
     const std::vector<StateU>& flux = is_X_dir ? rieamn.getXFlux() : rieamn.getYFlux();
@@ -28,43 +28,44 @@ void HyperbolicOperator::GodunovStep(bool is_X_dir, double dt)
         StateW& W = mesh.Cells[i].W;
         StateU U_prev(W, phases);
         StateU U_new;
-
         double UI = is_X_dir ? f_UI_x(W) : f_UI_y(W);
         double PI = f_PI(W); 
         double da_1 = muscl.getW_R()[i].a1 - muscl.getW_L()[i].a1;
 
+        double a1_face_L, a1_face_R;
+
         unsigned int face_L = mesh.Cells[i].faces_ID[face_dirs[0]] - k;
         unsigned int face_R = mesh.Cells[i].faces_ID[face_dirs[1]] - k;
 
-  
+
         U_new[0] = U_prev[0] - (dt/h) * (flux[face_R][0] - flux[face_L][0]);
 
         if (is_X_dir) {
             
-            U_new[1] = U_prev[1] - (dt/h) * ((flux[face_R][1] - flux[face_L][1]) + da_1 * PI); 
+            U_new[1] = U_prev[1] - (dt/h) * ((flux[face_R][1] - flux[face_L][1]) - da_1 * PI); 
             U_new[2] = U_prev[2] - (dt/h) * (flux[face_R][2] - flux[face_L][2]);               
         } else {
             
             U_new[1] = U_prev[1] - (dt/h) * (flux[face_R][1] - flux[face_L][1]);               
-            U_new[2] = U_prev[2] - (dt/h) * ((flux[face_R][2] - flux[face_L][2]) + da_1 * PI); 
+            U_new[2] = U_prev[2] - (dt/h) * ((flux[face_R][2] - flux[face_L][2]) - da_1 * PI); 
         }
         
-        U_new[3] = U_prev[3] - (dt/h) * ((flux[face_R][3] - flux[face_L][3]) + da_1 * PI * UI);
+        U_new[3] = U_prev[3] - (dt/h) * ((flux[face_R][3] - flux[face_L][3]) - da_1 * PI * UI);
 
         
         U_new[4] = U_prev[4] - (dt/h) * (flux[face_R][4] - flux[face_L][4]);
 
         if (is_X_dir) {
             
-            U_new[5] = U_prev[5] - (dt/h) * ((flux[face_R][5] - flux[face_L][5]) - da_1 * PI); 
+            U_new[5] = U_prev[5] - (dt/h) * ((flux[face_R][5] - flux[face_L][5]) + da_1 * PI); 
             U_new[6] = U_prev[6] - (dt/h) * (flux[face_R][6] - flux[face_L][6]);               
         } else {
             
             U_new[5] = U_prev[5] - (dt/h) * (flux[face_R][5] - flux[face_L][5]);              
-            U_new[6] = U_prev[6] - (dt/h) * ((flux[face_R][6] - flux[face_L][6]) - da_1 * PI); 
+            U_new[6] = U_prev[6] - (dt/h) * ((flux[face_R][6] - flux[face_L][6]) + da_1 * PI); 
         }
 
-        U_new[7] = U_prev[7] - (dt/h) * ((flux[face_R][7] - flux[face_L][7]) - da_1 * PI * UI);
+        U_new[7] = U_prev[7] - (dt/h) * ((flux[face_R][7] - flux[face_L][7]) + da_1 * PI * UI);
 
 
         double a1_new = W.a1 - UI * (dt/h) * da_1;
@@ -72,7 +73,7 @@ void HyperbolicOperator::GodunovStep(bool is_X_dir, double dt)
 
         W.a1 = a1_new;
 
-     
+    
         W.ro1 = U_new[0] / a1_new;
         W.u1 = U_new[1] / U_new[0];
         W.v1 = U_new[2] / U_new[0];
@@ -105,3 +106,7 @@ void HyperbolicOperator::HyperbolicStepY(double dt)
     GodunovStep(false, dt);
 
 } 
+
+
+
+
