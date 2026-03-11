@@ -5,8 +5,6 @@ RelaxationOperator::RelaxationOperator(Mesh& msh, const Components& comp) : mesh
 
 void RelaxationOperator::VelocityRelaxation(Cell& cell)
 {
-
-    double a2 = 1 - cell.W.a1;
     double UI = f_UI_x(cell.W);
     double VI = f_UI_y(cell.W);
 
@@ -180,7 +178,6 @@ inline double RelaxationOperator::SolvePressure(double m1, double m2, double E, 
 
     if((P1 > 0 && T1 > 0) && (P2 > 0 && T2 > 0))
         std::cout<<"ERROR SOLVE PRESSURE GIBBS RELAXATION! \n";
-
     //?
     return (P1 > 0 && T1 > 0) ? P1 : P2;
 }
@@ -236,7 +233,7 @@ void RelaxationOperator::GibbsFreeEnergyRelaxation(Cell& cell)
 
     if(g1_0 - g2_0 > 0) // condensation
     {
-        m1 = 1e-8;
+        m1 = 1e-5;
         m2 = M - m1;
 
         double P = SolvePressure(m1, m2, E, p1, p2);
@@ -267,7 +264,7 @@ void RelaxationOperator::GibbsFreeEnergyRelaxation(Cell& cell)
         {
             double m1_res, m2_res;
 
-            double m1_min = 1e-8;
+            double m1_min = 1e-5;
             double m1_max = W.a1*W.ro1;
 
             double m2_min = M - m1_min;
@@ -276,12 +273,12 @@ void RelaxationOperator::GibbsFreeEnergyRelaxation(Cell& cell)
             double f1 = Fdg(m1_min, m2_min, E);
             double f2 = Fdg(m1_max, m2_max, E);
 
-            if(std::fabs(f1) < 1e-8)
+            if(std::fabs(f1) < 1e-12)
             {
                 m1_res = m1_min;
                 m2_res = m2_min;
             }
-            else if(std::fabs(f2) < 1e-8)
+            else if(std::fabs(f2) < 1e-12)
             {
                 m1_res = m1_max;
                 m2_res = m2_max;
@@ -351,11 +348,12 @@ void RelaxationOperator::GibbsFreeEnergyRelaxation(Cell& cell)
         }
 
     }
-    else if (fabs(g1_0 - g2_0) < 0.01) 
+    else if (fabs(g1_0 - g2_0) < 0.0001) 
         return;
     else //evaporation
-    {
-        m1 = std::min(M-1e-8, (E-M*p2.q)/(p1.q-p2.q));
+    {//!!!!!!!!!!!!!!!!!!!!!!!!!
+        m1 = std::min(M-1e-5, (E-M*p2.q)/(p1.q-p2.q));
+        //m1 = M-1e8;
         m2 = M-m1;
 
         double P = SolvePressure(m1, m2, E, p1, p2);
@@ -395,12 +393,12 @@ void RelaxationOperator::GibbsFreeEnergyRelaxation(Cell& cell)
             double f1 = Fdg(m1_min, m2_min, E);
             double f2 = Fdg(m1_max, m2_max, E);
             
-             if(std::fabs(f1) < 1e-8)
+            if(std::fabs(f1) < 1e-12)
             {
                 m1_res = m1_min;
                 m2_res = m2_min;
             }
-            else if(std::fabs(f2) < 1e-8)
+            else if(std::fabs(f2) < 1e-12)
             {
                 m1_res = m1_max;
                 m2_res = m2_max;
@@ -422,7 +420,7 @@ void RelaxationOperator::GibbsFreeEnergyRelaxation(Cell& cell)
             else
             {
                 int maxIter = 1000;
-                double tol = 1e-8;
+                double tol = 1e-10;
 
                 for(int i = 0; i < maxIter; ++i)
                 {

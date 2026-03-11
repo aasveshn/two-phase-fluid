@@ -3,8 +3,8 @@ import numpy as np
 # =================================================================
 # =========== ГЕОМЕТРИЧЕСКИЕ ПАРАМЕТРЫ И РАЗРЕШЕНИЕ============
 # =================================================================
-dx = 0.0004 # шаг сетки по X
-dy = 0.0005  # шаг сетки по Y
+dx = 0.00025 # шаг сетки по X
+dy = 0.00025  # шаг сетки по Y
 
 # параметры трубы
 pipe_length = 0.150  # длина трубы
@@ -12,7 +12,7 @@ pipe_height = 0.005  # высота трубы
 
 # параметры камеры
 chamber_length = 0.050  # длина камеры
-chamber_height = 0.02  # высота камеры
+chamber_height = 0.04  # высота камеры
 
 # типы граней 
 TYPE_INTERNAL = 0 # внутренняя
@@ -108,7 +108,7 @@ for i in range(nx_total):
 
 num_faces = face_id_counter
 
-with open("../mesh.txt", "w") as f:
+with open("../input/mesh.txt", "w") as f:
     f.write(f"{nx_total} {ny_total} {num_cells} {num_faces}\n")
     
     for cid, i, j in cell_list:

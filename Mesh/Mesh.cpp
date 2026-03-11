@@ -20,6 +20,7 @@ Mesh::Mesh(std::string filename)
 
     Cells.reserve(N_cells);
     Faces.reserve(N_faces);
+    
 
     for(unsigned int k = 0; k < N_cells; ++k )
     {
@@ -54,7 +55,7 @@ Mesh::Mesh(std::string filename)
 //Необходима реализация
 void Mesh::SetInitialCondidions(const Components& phases)
 {
-    unsigned int discontinuity = 375;
+    unsigned int discontinuity = 598;
     double a1L, ro1L, u1L, v1L, P1L, ro2L, u2L, v2L, P2L,
            a1R, ro1R, u1R, v1R, P1R, ro2R, u2R, v2R, P2R;
     double WL[7];
