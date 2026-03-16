@@ -35,17 +35,24 @@ void HyperbolicOperator::GodunovStep(bool is_X_dir, double dt)
         unsigned int face_L = mesh.Cells[i].faces_ID[face_dirs[0]] - k;
         unsigned int face_R = mesh.Cells[i].faces_ID[face_dirs[1]] - k;
 
+        double K1, K2, K1_new, K2_new;
+
 
         U_new[0] = U_prev[0] - (dt/h) * (flux[face_R][0] - flux[face_L][0]);
 
         if (is_X_dir) {
             
             U_new[1] = U_prev[1] - (dt/h) * ((flux[face_R][1] - flux[face_L][1]) - da_1 * PI); 
-            U_new[2] = U_prev[2] - (dt/h) * (flux[face_R][2] - flux[face_L][2]);               
+            U_new[2] = U_prev[2] - (dt/h) * (flux[face_R][2] - flux[face_L][2]);   
+            K1 = W.a1*W.ro1*0.5*W.v1*W.v1;
+            K2 = (1-W.a1)*W.ro2*0.5*W.v2*W.v2;
+
         } else {
             
             U_new[1] = U_prev[1] - (dt/h) * (flux[face_R][1] - flux[face_L][1]);               
             U_new[2] = U_prev[2] - (dt/h) * ((flux[face_R][2] - flux[face_L][2]) - da_1 * PI); 
+            K1 = W.a1*W.ro1*0.5*W.u1*W.u1;
+            K2 = (1-W.a1)*W.ro2*0.5*W.u2*W.u2;
         }
         
         U_new[3] = U_prev[3] - (dt/h) * ((flux[face_R][3] - flux[face_L][3]) - da_1 * PI * UI);
@@ -65,21 +72,8 @@ void HyperbolicOperator::GodunovStep(bool is_X_dir, double dt)
 
         U_new[7] = U_prev[7] - (dt/h) * ((flux[face_R][7] - flux[face_L][7]) + da_1 * PI * UI);
 
-
-
-        double K1, K2, K1_new, K2_new; 
-        if(is_X_dir)
-        {
-            K1 = (W.ro1*W.v1*W.ro1*W.v1)/(2.0*W.ro1);
-            K2 = (W.ro2*W.v2*W.ro2*W.v2)/(2.0*W.ro2);
-        }
-        else
-        {
-            K1 = (W.ro1*W.u1*W.ro1*W.u1)/(2.0*W.ro1);
-            K2 = (W.ro2*W.u2*W.ro2*W.u2)/(2.0*W.ro2);
-        }
-
-        double roe1 = U_new[3] 
+        K1_new = K1 - (dt/h) * ((flux[face_R][8] - flux[face_L][8]));
+        K2_new = K2 - (dt/h) * ((flux[face_R][9] - flux[face_L][9]));
 
 
         double a1_new = W.a1 - UI * (dt/h) * da_1;
@@ -91,16 +85,34 @@ void HyperbolicOperator::GodunovStep(bool is_X_dir, double dt)
         W.ro1 = U_new[0] / a1_new;
         W.u1 = U_new[1] / U_new[0];
         W.v1 = U_new[2] / U_new[0];
-        double E1_new = U_new[3] / U_new[0];
-        double e1_new = E1_new - 0.5 * (W.u1 * W.u1 + W.v1 * W.v1);
-        W.P1 = P_ro_e(W.ro1, e1_new, phases.p1);
 
         W.ro2 = U_new[4] / a2_new;
         W.u2 = U_new[5] / U_new[4];
         W.v2 = U_new[6] / U_new[4];
-        double E2_new = U_new[7] / U_new[4];
-        double e2_new = E2_new - 0.5 * (W.u2 * W.u2 + W.v2 * W.v2);
+
+        double e1_new, e2_new;
+
+         if (is_X_dir) {
+            
+            double kin_norm1 = (U_new[1] * U_new[1]) / (2.0 * U_new[0]);
+            double kin_norm2 = (U_new[5] * U_new[5]) / (2.0 * U_new[4]);
+
+            
+            e1_new = (U_new[3] - K1_new - kin_norm1) / U_new[0];
+            e2_new = (U_new[7] - K2_new - kin_norm2) / U_new[4];
+        } 
+        else {
+            
+            double kin_norm1 = (U_new[2] * U_new[2]) / (2.0 * U_new[0]);
+            double kin_norm2 = (U_new[6] * U_new[6]) / (2.0 * U_new[4]);
+
+            e1_new = (U_new[3] - K1_new - kin_norm1) / U_new[0];
+            e2_new = (U_new[7] - K2_new - kin_norm2) / U_new[4];
+        }
+
+        W.P1 = P_ro_e(W.ro1, e1_new, phases.p1);
         W.P2 = P_ro_e(W.ro2, e2_new, phases.p2);
+
     }
 }
    

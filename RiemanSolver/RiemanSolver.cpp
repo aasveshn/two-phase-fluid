@@ -94,6 +94,7 @@ void RiemanSolver::HLLC(const Mesh& mesh, const std::vector<StateW>& WL_in, cons
         StateU UL(WL, phases); 
         StateU UR(WR, phases);
 
+  
         double C1L = f_C(WL.P1, WL.ro1, phases.p1);
         double C2L = f_C(WL.P2, WL.ro2, phases.p2);
         double C1R = f_C(WR.P1, WR.ro1, phases.p1);
@@ -116,18 +117,24 @@ void RiemanSolver::HLLC(const Mesh& mesh, const std::vector<StateW>& WL_in, cons
             uR = (a1R*WR.ro1*WR.u1 + a2R*WR.ro2*WR.u2)/roR;
 
             double s_C = (PR - PL + roL*uL*(sL-uL) - roR*uR*(sR-uR))/(roL*(sL-uL) - roR*(sR-uR));
+
+            UL.K1 = UL.ar1 * 0.5 * WL.v1 * WL.v1; 
+            UL.K2 = UL.ar2 * 0.5 * WL.v2 * WL.v2;
+            UR.K1 = UR.ar1 * 0.5 * WR.v1 * WR.v1;
+            UR.K2 = UR.ar2 * 0.5 * WR.v2 * WR.v2;
             
            
             UL_C[0] = a1L*WL.ro1*((sL-WL.u1)/(sL-s_C));
             UL_C[1] = UL_C[0]*s_C;   
             UL_C[2] = UL_C[0]*WL.v1; 
             UL_C[3] = UL_C[0]*(E(e_P_ro(WL.P1, WL.ro1, phases.p1), WL.u1, WL.v1) + (s_C-WL.u1)*(s_C + WL.P1/(WL.ro1*(sL-WL.u1))));
-            
-            
             UL_C[4] = a2L*WL.ro2*((sL-WL.u2)/(sL-s_C));
             UL_C[5] = UL_C[4]*s_C;   
             UL_C[6] = UL_C[4]*WL.v2; 
             UL_C[7] = UL_C[4]*(E(e_P_ro(WL.P2, WL.ro2, phases.p2), WL.u2, WL.v2) + (s_C-WL.u2)*(s_C + WL.P2/(WL.ro2*(sL-WL.u2))));
+
+            UL_C[8] = UL_C[0] * 0.5 * WL.v1 * WL.v1;
+            UL_C[9] = UL_C[4] * 0.5 * WL.v2 * WL.v2;
 
             
             UR_C[0] = a1R*WR.ro1*((sR-WR.u1)/(sR-s_C));
@@ -136,6 +143,9 @@ void RiemanSolver::HLLC(const Mesh& mesh, const std::vector<StateW>& WL_in, cons
             UR_C[4] = a2R*WR.ro2*((sR-WR.u2)/(sR-s_C));
             UR_C[5] = UR_C[4]*s_C; UR_C[6] = UR_C[4]*WR.v2;
             UR_C[7] = UR_C[4]*(E(e_P_ro(WR.P2, WR.ro2, phases.p2), WR.u2, WR.v2) + (s_C-WR.u2)*(s_C + WR.P2/(WR.ro2*(sR-WR.u2))));
+
+            UR_C[8] = UR_C[0] * 0.5 * WR.v1 * WR.v1;
+            UR_C[9] = UR_C[4] * 0.5 * WR.v2 * WR.v2;
 
             
             if(sL >= 0) {
@@ -147,10 +157,12 @@ void RiemanSolver::HLLC(const Mesh& mesh, const std::vector<StateW>& WL_in, cons
                 flux[i-k][5] = UL[5]*WL.u2 + a2L*WL.P2; 
                 flux[i-k][6] = UL[5]*WL.v2; 
                 flux[i-k][7] = (UL[7] + a2L*WL.P2)*WL.u2;
+                flux[i-k][8] = UL[1]*0.5*WL.v1*WL.v1;
+                flux[i-k][9] = UL[5]*0.5*WL.v2*WL.v2;
             } else if(sL <= 0 && s_C >= 0) {
-                for(int j=0; j<8; ++j) flux[i-k][j] = get_F_X(UL, WL, a1L, a2L)[j] + sL*(UL_C[j] - UL[j]);
+                for(int j=0; j<10; ++j) flux[i-k][j] = get_F_X(UL, WL, a1L, a2L)[j] + sL*(UL_C[j] - UL[j]);
             } else if(s_C <= 0 && sR >= 0) {
-                for(int j=0; j<8; ++j) flux[i-k][j] = get_F_X(UR, WR, a1R, a2R)[j] + sR*(UR_C[j] - UR[j]);
+                for(int j=0; j<10; ++j) flux[i-k][j] = get_F_X(UR, WR, a1R, a2R)[j] + sR*(UR_C[j] - UR[j]);
             } else {
                 flux[i-k][0] = UR[1]; 
                 flux[i-k][1] = UR[1]*WR.u1 + a1R*WR.P1;
@@ -160,6 +172,8 @@ void RiemanSolver::HLLC(const Mesh& mesh, const std::vector<StateW>& WL_in, cons
                 flux[i-k][5] = UR[5]*WR.u2 + a2R*WR.P2; 
                 flux[i-k][6] = UR[5]*WR.v2;
                 flux[i-k][7] = (UR[7] + a2R*WR.P2)*WR.u2;
+                flux[i-k][8] = UR[1]*0.5*WR.v1*WR.v1;
+                flux[i-k][9] = UR[5]*0.5*WR.v2*WR.v2;
             }
         }
         else
@@ -172,17 +186,23 @@ void RiemanSolver::HLLC(const Mesh& mesh, const std::vector<StateW>& WL_in, cons
 
             double s_C = (PR - PL + roL*uL*(sL-uL) - roR*uR*(sR-uR))/(roL*(sL-uL) - roR*(sR-uR));
 
+            UL.K1 = UL.ar1 * 0.5 * WL.u1 * WL.u1; 
+            UL.K2 = UL.ar2 * 0.5 * WL.u2 * WL.u2;
+            UR.K1 = UR.ar1 * 0.5 * WR.u1 * WR.u1;
+            UR.K2 = UR.ar2 * 0.5 * WR.u2 * WR.u2;
+
             
             UL_C[0] = a1L*WL.ro1*((sL-WL.v1)/(sL-s_C));
             UL_C[1] = UL_C[0]*WL.u1; 
             UL_C[2] = UL_C[0]*s_C;   
             UL_C[3] = UL_C[0]*(E(e_P_ro(WL.P1, WL.ro1, phases.p1), WL.u1, WL.v1) + (s_C-WL.v1)*(s_C + WL.P1/(WL.ro1*(sL-WL.v1))));
-
-           
             UL_C[4] = a2L*WL.ro2*((sL-WL.v2)/(sL-s_C));
             UL_C[5] = UL_C[4]*WL.u2; 
             UL_C[6] = UL_C[4]*s_C;   
             UL_C[7] = UL_C[4]*(E(e_P_ro(WL.P2, WL.ro2, phases.p2), WL.u2, WL.v2) + (s_C-WL.v2)*(s_C + WL.P2/(WL.ro2*(sL-WL.v2))));
+
+            UL_C[8] = UL_C[0] * 0.5 * WL.u1 * WL.u1;
+            UL_C[9] = UL_C[4] * 0.5 * WL.u2 * WL.u2;
 
             
             UR_C[0] = a1R*WR.ro1*((sR-WR.v1)/(sR-s_C));
@@ -191,6 +211,9 @@ void RiemanSolver::HLLC(const Mesh& mesh, const std::vector<StateW>& WL_in, cons
             UR_C[4] = a2R*WR.ro2*((sR-WR.v2)/(sR-s_C));
             UR_C[5] = UR_C[4]*WR.u2; UR_C[6] = UR_C[4]*s_C;
             UR_C[7] = UR_C[4]*(E(e_P_ro(WR.P2, WR.ro2, phases.p2), WR.u2, WR.v2) + (s_C-WR.v2)*(s_C + WR.P2/(WR.ro2*(sR-WR.v2))));
+
+            UR_C[8] = UR_C[0] * 0.5 * WR.u1 * WR.u1;
+            UR_C[9] = UR_C[4] * 0.5 * WR.u2 * WR.u2;
 
             if(sL >= 0) {
                 flux[i-k][0] = UL[2];
@@ -201,10 +224,12 @@ void RiemanSolver::HLLC(const Mesh& mesh, const std::vector<StateW>& WL_in, cons
                 flux[i-k][5] = UL[6]*WL.u2; 
                 flux[i-k][6] = UL[6]*WL.v2 + a2L*WL.P2; 
                 flux[i-k][7] = (UL[7] + a2L*WL.P2)*WL.v2;
+                flux[i-k][8] = UL[2]*0.5*WL.u1*WL.u1;
+                flux[i-k][9] = UL[6]*0.5*WL.u2*WL.u2;
             } else if(sL <= 0 && s_C >= 0) {
-                for(int j=0; j<8; ++j) flux[i-k][j] = get_F_Y(UL, WL, a1L, a2L)[j] + sL*(UL_C[j] - UL[j]);
+                for(int j=0; j<10; ++j) flux[i-k][j] = get_F_Y(UL, WL, a1L, a2L)[j] + sL*(UL_C[j] - UL[j]);
             } else if(s_C <= 0 && sR >= 0) {
-                for(int j=0; j<8; ++j) flux[i-k][j] = get_F_Y(UR, WR, a1R, a2R)[j] + sR*(UR_C[j] - UR[j]);
+                for(int j=0; j<10; ++j) flux[i-k][j] = get_F_Y(UR, WR, a1R, a2R)[j] + sR*(UR_C[j] - UR[j]);
             } else {
                 flux[i-k][0] = UR[2]; 
                 flux[i-k][1] = UR[2]*WR.u1;
@@ -214,6 +239,8 @@ void RiemanSolver::HLLC(const Mesh& mesh, const std::vector<StateW>& WL_in, cons
                 flux[i-k][5] = UR[6]*WR.u2; 
                 flux[i-k][6] = UR[6]*WR.v2 + a2R*WR.P2; 
                 flux[i-k][7] = (UR[7] + a2R*WR.P2)*WR.v2;
+                flux[i-k][8] = UR[2]*0.5*WR.u1*WR.u1;
+                flux[i-k][9] = UR[6]*0.5*WR.u2*WR.u2;
             }
         }
     }

@@ -7,18 +7,22 @@
 struct StateU {
     union {
         struct {
-            double ar1, aru1, arv1, arE1, ar2, aru2,arv2, arE2;  
+            double ar1, aru1, arv1, arE1, ar2, aru2, arv2, arE2, K1, K2;  
         };
-        double v[8]; 
+        double v[10]; 
     };
 
     
-    StateU() : ar1(0), aru1(0), arv1(0), arE1(0), ar2(0), aru2(0), arv2(0), arE2(0) {}
+    StateU() : ar1(0), aru1(0), arv1(0), arE1(0), ar2(0), aru2(0), arv2(0), arE2(0), K1(0), K2(0) {}
 
     
     StateU(double ar1, double aru1, double arv1, double arE1, 
            double ar2, double aru2, double arv2, double arE2)
-        : ar1(ar1), aru1(aru1), arv1(arv1), arE1(arE1), ar2(ar2), aru2(aru2), arv2(arv2), arE2(arE2) {}
+        : ar1(ar1), aru1(aru1), arv1(arv1), arE1(arE1), ar2(ar2), aru2(aru2), arv2(arv2), arE2(arE2), K1(0), K2(0) {}
+
+     StateU(double ar1, double aru1, double arv1, double arE1, 
+           double ar2, double aru2, double arv2, double arE2, double K1, double K2)
+        : ar1(ar1), aru1(aru1), arv1(arv1), arE1(arE1), ar2(ar2), aru2(aru2), arv2(arv2), arE2(arE2), K1(K1), K2(K2) {}
 
     StateU(const StateW& w, const Components& comp)
     {
@@ -30,17 +34,19 @@ struct StateU {
         aru2 = (1-w.a1)*w.ro2*w.u2;
         arv2 = (1-w.a1)*w.ro2*w.v2;
         arE2 =(1-w.a1)*w.ro2*E(e_P_ro(w.P2, w.ro2, comp.p2), w.u2, w.v2);
+        K1 = 0;
+        K2 = 0;
     }
 
     inline void zero() {
-        ar1 = aru1 =  arv1 = arE1 = ar2 = aru2 = arv2 = arE2 = 0.0;
+        ar1 = aru1 =  arv1 = arE1 = ar2 = aru2 = arv2 = arE2 = K1 = K2 = 0.0;
     }
 
     
     inline StateU operator+(const StateU& u) const {
         return StateU(
             ar1 + u.ar1, aru1 + u.aru1, arv1 + u.arv1, arE1 + u.arE1,
-            ar2 + u.ar2, aru2 + u.aru2, arv2 + u.arv2, arE2 + u.arE2
+            ar2 + u.ar2, aru2 + u.aru2, arv2 + u.arv2, arE2 + u.arE2, K1 + u.K1, K2 + u.K2
         );
     }
 
@@ -48,7 +54,7 @@ struct StateU {
     inline StateU operator-(const StateU& u) const {
         return StateU(
             ar1 - u.ar1, aru1 - u.aru1, arv1 - u.arv1, arE1 - u.arE1,
-            ar2 - u.ar2, aru2 - u.aru2, arv2 - u.arv2, arE2 - u.arE2
+            ar2 - u.ar2, aru2 - u.aru2, arv2 - u.arv2, arE2 - u.arE2, K1 - u.K1, K2 - u.K2
         );
     }
 
@@ -56,7 +62,7 @@ struct StateU {
     inline StateU operator*(double c) const {
         return StateU(
             ar1 * c, aru1 * c, arv1 * c, arE1 * c,
-            ar2 * c, aru2 * c, arv2 * c, arE2 * c
+            ar2 * c, aru2 * c, arv2 * c, arE2 * c, K1 * c, K2 * c
         );
     }
 
@@ -76,7 +82,10 @@ inline StateU get_F_X(const StateU& U, const StateW& W, double a1, double a2) {
     F[4] = U[5];                         
     F[5] = U[5] * W.u2 + a2 * W.P2;       
     F[6] = U[5] * W.v2;                  
-    F[7] = (U[7] + a2 * W.P2) * W.u2;     
+    F[7] = (U[7] + a2 * W.P2) * W.u2;    
+    
+    F[8] = F[0]*0.5*W.v1*W.v1;
+    F[9] = F[4]*0.5*W.v2*W.v2;
 
     return F;
 }
@@ -93,7 +102,9 @@ inline StateU get_F_Y(const StateU& U, const StateW& W, double a1, double a2) {
     G[4] = U[6];                         
     G[5] = U[6] * W.u2;                   
     G[6] = U[6] * W.v2 + a2 * W.P2;       
-    G[7] = (U[7] + a2 * W.P2) * W.v2;     
-
+    G[7] = (U[7] + a2 * W.P2) * W.v2;  
+    
+    G[8] = G[0]*0.5*W.u1*W.u1;
+    G[9] = G[4]*0.5*W.u2*W.u2;
     return G;
 }
