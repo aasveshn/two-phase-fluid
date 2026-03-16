@@ -12,7 +12,7 @@ int main()
 {
 	Mesh mesh("input/mesh.txt");
 	auto solver = std::make_unique<Solver>(mesh);
-	mesh.SetInitialCondidions(solver->getPhases());
+	mesh.SetInitialCondidions();
 	solver -> Solve();
 		
 	return 0;

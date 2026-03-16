@@ -14,6 +14,10 @@ struct StateW {
     StateW(double a1, double r1, double u1, double v1, double P1, double r2, double u2, double v2, double P2)
         : a1(a1), ro1(r1), u1(u1), v1(v1), P1(P1), ro2(r2), u2(u2), v2(v2), P2(P2) {}
 
+    StateW(const StateW& other)
+        : a1(other.a1), ro1(other.ro1), u1(other.u1), v1(other.v1), P1(other.P1),
+        ro2(other.ro2), u2(other.u2), v2(other.v2), P2(other.P2) {}
+
    
     inline StateW operator+(const StateW& s) const {
         return {a1 + s.a1, ro1 + s.ro1, u1 + s.u1, v1 + s.v1, P1 + s.P1, 

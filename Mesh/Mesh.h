@@ -22,5 +22,5 @@ public:
     unsigned int VertToHoriz;
 
     Mesh(std::string filename);
-    void SetInitialCondidions(const Components& phases);
+    void SetInitialCondidions();
 };

@@ -97,7 +97,6 @@ void RelaxationOperator::PressureTemperatureRelaxation(Cell& cell)
     const Phase& p1 = phases.p1;
     const Phase& p2 = phases.p2;
     double a2 = 1 - W.a1;
-    double PI = f_PI(W);
 
     double al_1 = p1.Cv*(p1.gamma-1)*W.a1*W.ro1;
     double al_2 = p2.Cv*(p2.gamma-1)*a2*W.ro2;
@@ -122,14 +121,12 @@ void RelaxationOperator::PressureTemperatureRelaxation(Cell& cell)
         return;
     }
 
-    double ak0 = p1.Cv*(p1.gamma - 1)*W.a1*W.ro1;
     double ak0_x1 = 1.0/(1.0 + (al_2/al_1) * ((x1 + p1.P0)/(x1 + p2.P0)));
     double ak0_x2 = 1.0/(1.0 + (al_2/al_1) * ((x2 + p1.P0)/(x2 + p2.P0)));
 
     double a1_x1 = ak0_x1;
-    double a2_x1 = 1 - a1_x1;
     double a1_x2 = ak0_x2;
-    double a2_x2 = 1 - a1_x2;
+
 
     double a1_new, P_eq;
     
@@ -504,7 +501,7 @@ double RelaxationOperator::SolveTemperature(double P, double T0, double tol, int
 void RelaxationOperator::Relax()
 {
 
-    for(int i = 0; i < mesh.Cells.size(); ++i)
+    for(size_t i = 0; i < mesh.Cells.size(); ++i)
     {
         VelocityRelaxation(mesh.Cells[i]);
         PressureRelaxation(mesh.Cells[i]);

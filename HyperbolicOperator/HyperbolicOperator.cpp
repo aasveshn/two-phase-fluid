@@ -32,8 +32,6 @@ void HyperbolicOperator::GodunovStep(bool is_X_dir, double dt)
         double PI = f_PI(W); 
         double da_1 = muscl.getW_R()[i].a1 - muscl.getW_L()[i].a1;
 
-        double a1_face_L, a1_face_R;
-
         unsigned int face_L = mesh.Cells[i].faces_ID[face_dirs[0]] - k;
         unsigned int face_R = mesh.Cells[i].faces_ID[face_dirs[1]] - k;
 
@@ -66,6 +64,22 @@ void HyperbolicOperator::GodunovStep(bool is_X_dir, double dt)
         }
 
         U_new[7] = U_prev[7] - (dt/h) * ((flux[face_R][7] - flux[face_L][7]) + da_1 * PI * UI);
+
+
+
+        double K1, K2, K1_new, K2_new; 
+        if(is_X_dir)
+        {
+            K1 = (W.ro1*W.v1*W.ro1*W.v1)/(2.0*W.ro1);
+            K2 = (W.ro2*W.v2*W.ro2*W.v2)/(2.0*W.ro2);
+        }
+        else
+        {
+            K1 = (W.ro1*W.u1*W.ro1*W.u1)/(2.0*W.ro1);
+            K2 = (W.ro2*W.u2*W.ro2*W.u2)/(2.0*W.ro2);
+        }
+
+        double roe1 = U_new[3] 
 
 
         double a1_new = W.a1 - UI * (dt/h) * da_1;

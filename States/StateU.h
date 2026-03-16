@@ -18,7 +18,7 @@ struct StateU {
     
     StateU(double ar1, double aru1, double arv1, double arE1, 
            double ar2, double aru2, double arv2, double arE2)
-        : ar1(ar1), aru1(aru1), arv1(arv1), arE1(arE1), ar2(2), aru2(aru2), arv2(arv2), arE2(arE2) {}
+        : ar1(ar1), aru1(aru1), arv1(arv1), arE1(arE1), ar2(ar2), aru2(aru2), arv2(arv2), arE2(arE2) {}
 
     StateU(const StateW& w, const Components& comp)
     {

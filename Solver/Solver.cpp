@@ -1,18 +1,18 @@
 #include "Solver.h"
 
 Solver::Solver(Mesh& msh):mesh(msh),
-                          phases(Phase(gamma_dodecane_vapor,
-                                       P0_dodecane_vapor,
-                                       Cv_dodecane_vapor,
-                                       Cp_dodecane_vapor,
-                                       q_dodecane_vapor,
-                                       qs_dodecane_vapor),
-                                 Phase(gamma_dodecane_liquid,
-                                       P0_dodecane_liquid,
-                                       Cv_dodecane_liquid,
-                                       Cp_dodecane_liquid,
-                                       q_dodecane_liquid,
-                                       qs_dodecane_liquid)), 
+                          phases(Phase(gamma_water_vapor,
+                                       P0_water_vapor,
+                                       Cv_water_vapor,
+                                       Cp_water_vapor,
+                                       q_water_vapor,
+                                       qs_water_vapor),
+                                 Phase(gamma_water_liquid,
+                                       P0_water_liquid,
+                                       Cv_water_liquid,
+                                       Cp_water_liquid,
+                                       q_water_liquid,
+                                       qs_water_liquid)), 
                            HyperbolicOp(msh, phases),
                            RelaxationOp(msh, phases){}
 
@@ -21,7 +21,7 @@ double Solver::compute_dt()
     double MaxValue = -1.0; 
     double h = std::max(dx, dy);
 
-    for (int i = 0; i < mesh.Cells.size(); ++i)
+    for (size_t i = 0; i < mesh.Cells.size(); ++i)
     {
         const StateW& W = mesh.Cells[i].W;
         

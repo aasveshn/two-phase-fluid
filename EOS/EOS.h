@@ -41,7 +41,7 @@ inline double ro_e_T(double e, double T, const Phase& ph)
 
 inline double P_ro_T(double ro, double T, const Phase& ph)
 {
-    return T*ph.Cv*(ph.gamma - 1.0) - ph.P0;
+    return T*ro*ph.Cv*(ph.gamma - 1.0) - ph.P0;
 }
 
 inline double P_ro_e(double ro, double e, const Phase& ph)
