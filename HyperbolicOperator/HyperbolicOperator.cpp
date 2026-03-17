@@ -30,6 +30,7 @@ void HyperbolicOperator::GodunovStep(bool is_X_dir, double dt)
         StateU U_new;
         double UI = is_X_dir ? f_UI_x(W) : f_UI_y(W);
         double PI = f_PI(W); 
+
         double da_1 = muscl.getW_R()[i].a1 - muscl.getW_L()[i].a1;
 
         unsigned int face_L = mesh.Cells[i].faces_ID[face_dirs[0]] - k;

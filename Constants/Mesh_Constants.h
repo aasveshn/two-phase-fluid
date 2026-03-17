@@ -1,6 +1,6 @@
 #pragma once
 //CFL
-const double CFL = 0.1;
+const double CFL = 0.05;
 // cell constants
 const double dx = 0.00025;
 const double dy = 0.00025;

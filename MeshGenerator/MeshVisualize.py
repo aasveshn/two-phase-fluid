@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-def visualize_mesh(filename, dx=0.01, dy=0.01):
+def visualize_mesh(filename, dx=0.025, dy=0.025):
     cells = []
     faces = []
 
@@ -84,4 +84,4 @@ def visualize_mesh(filename, dx=0.01, dy=0.01):
     plt.show()
 
 if __name__ == "__main__":
-    visualize_mesh("../mesh.txt", dx=0.0004, dy=0.0005)
+    visualize_mesh("../input/mesh.txt", dx=0.0004, dy=0.0005)
