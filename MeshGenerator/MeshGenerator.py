@@ -12,8 +12,7 @@ pipe_height = 0.005  # высота трубы
 
 # параметры камеры
 chamber_length = 0.050  # длина камеры
-#chamber_height = 0.04  # высота камеры
-chamber_height = 0.005
+chamber_height = 0.040  # высота камеры
 
 # типы граней 
 TYPE_INTERNAL = 0 # внутренняя

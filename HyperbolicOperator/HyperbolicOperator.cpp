@@ -35,6 +35,26 @@ void HyperbolicOperator::GodunovStep(bool is_X_dir, double dt)
 
         unsigned int face_L = mesh.Cells[i].faces_ID[face_dirs[0]] - k;
         unsigned int face_R = mesh.Cells[i].faces_ID[face_dirs[1]] - k;
+/*
+       if(i == 11999) {
+    std::cout << "Cell 11999, face_R=" << face_R << "\n";
+    std::cout << "flux_R[0]=" << flux[face_R][0] << "\n";
+    std::cout << "flux_R[1]=" << flux[face_R][1] << "\n";
+    std::cout << "flux_R[2]=" << flux[face_R][2] << "\n";
+     std::cout << "flux_R[3]=" << flux[face_R][3] << "\n";
+    std::cout << "flux_R[4]=" << flux[face_R][4] << "\n";
+    std::cout << "flux_R[5]=" << flux[face_R][5] << "\n";
+     std::cout << "flux_R[6]=" << flux[face_R][6] << "\n";
+    std::cout << "flux_L[0]=" << flux[face_L][0] << "\n";
+    std::cout << "flux_L[1]=" << flux[face_L][1] << "\n";
+    std::cout << "flux_L[2]=" << flux[face_L][2] << "\n";
+     std::cout << "flux_L[3]=" << flux[face_L][3] << "\n";
+    std::cout << "flux_L[4]=" << flux[face_L][4] << "\n";
+    std::cout << "flux_L[5]=" << flux[face_L][5] << "\n";
+     std::cout << "flux_L[6]=" << flux[face_L][6] << "\n";
+    std::cout << "flux_L[7]=" << flux[face_L][7] << "\n";
+    std::cout << "da_1=" << da_1 << " PI=" << PI << " UI=" << UI << "\n";
+} */
 
         double K1, K2, K1_new, K2_new;
 

@@ -230,7 +230,7 @@ void RelaxationOperator::GibbsFreeEnergyRelaxation(Cell& cell)
 
     if(g1_0 - g2_0 > 0) // condensation
     {
-        m1 = 1e-5;
+        m1 = 1e-8;
         m2 = M - m1;
 
         double P = SolvePressure(m1, m2, E, p1, p2);
@@ -261,7 +261,7 @@ void RelaxationOperator::GibbsFreeEnergyRelaxation(Cell& cell)
         {
             double m1_res, m2_res;
 
-            double m1_min = 1e-5;
+            double m1_min = 1e-8;
             double m1_max = W.a1*W.ro1;
 
             double m2_min = M - m1_min;
@@ -349,7 +349,7 @@ void RelaxationOperator::GibbsFreeEnergyRelaxation(Cell& cell)
         return;
     else //evaporation
     {//!!!!!!!!!!!!!!!!!!!!!!!!!
-        m1 = std::min(M-1e-5, (E-M*p2.q)/(p1.q-p2.q));
+        m1 = std::min(M-1e-8, (E-M*p2.q)/(p1.q-p2.q));
         //m1 = M-1e8;
         m2 = M-m1;
 
@@ -401,8 +401,7 @@ void RelaxationOperator::GibbsFreeEnergyRelaxation(Cell& cell)
                 m2_res = m2_max;
             }
              if (f1 * f2 > 0.0)
-            {
-                   
+            {                  
                 if(std::fabs(f1) < std::fabs(f2))
                 {
                     m1_res = m1_min;
@@ -418,7 +417,7 @@ void RelaxationOperator::GibbsFreeEnergyRelaxation(Cell& cell)
             {
                 int maxIter = 1000;
                 double tol = 1e-10;
-
+                
                 for(int i = 0; i < maxIter; ++i)
                 {
                 
@@ -500,21 +499,23 @@ double RelaxationOperator::SolveTemperature(double P, double T0, double tol, int
 
 void RelaxationOperator::Relax()
 {
-
+   
     for(size_t i = 0; i < mesh.Cells.size(); ++i)
     {
         VelocityRelaxation(mesh.Cells[i]);
         PressureRelaxation(mesh.Cells[i]);
-        if(mesh.Cells[i].is_Interface())
-            PressureTemperatureRelaxation(mesh.Cells[i]);
-       if(mesh.Cells[i].is_Interface())
-        {
+        //if(mesh.Cells[i].is_Interface())
+          PressureTemperatureRelaxation(mesh.Cells[i]);
+          
+       //if(mesh.Cells[i].is_Interface())
+        //{
            double T = T_ro_P(mesh.Cells[i].W.ro1, mesh.Cells[i].W.P1, phases.p1);
             double Tsat = SolveTemperature(mesh.Cells[i].W.P1, T, 1e-2, 1000);
-            if(T > Tsat)
-            {
+            if(T > Tsat + 10)
+            {   
+                //std::cout<<SolveTemperature(2790000, T, 1e-2, 1000)<<" ";
                GibbsFreeEnergyRelaxation(mesh.Cells[i]);
             } 
-        }
+        //}
     }
 }
