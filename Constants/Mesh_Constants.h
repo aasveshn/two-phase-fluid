@@ -5,6 +5,6 @@ const double CFL = 0.1;
 const double dx = 0.00025;
 const double dy = 0.00025;
 //Slope limiter
-const double betta = 1.0;
+const double betta = 1;
 //final time 
-const double t_end = 0.00001;
+const double t_end = 0.0001;

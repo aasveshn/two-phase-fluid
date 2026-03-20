@@ -113,24 +113,25 @@ void Solver::Solve()
         {
             RelaxationOp.Relax();
             HyperbolicOp.HyperbolicStepX(dt*0.5);
-            RelaxationOp.Relax();
             HyperbolicOp.HyperbolicStepY(dt);
-            RelaxationOp.Relax();
             HyperbolicOp.HyperbolicStepX(dt*0.5);
+
             RelaxationOp.Relax();
+
+        
         }
         else
         {
             RelaxationOp.Relax();
             HyperbolicOp.HyperbolicStepY(dt*0.5);
-            RelaxationOp.Relax();
             HyperbolicOp.HyperbolicStepX(dt);
-            RelaxationOp.Relax();
             HyperbolicOp.HyperbolicStepY(dt*0.5);
             RelaxationOp.Relax();
         }
         
         time += dt;
+
+        
 
 
         for (const auto& cell : mesh.Cells) {
@@ -160,6 +161,9 @@ void Solver::Solve()
         std::cout<<time<<" "<<step<<"\n";
         if(time + dt > t_end)
             dt = t_end - time;
+
+        //if( step == 100)
+          //  break;
     }
 
 

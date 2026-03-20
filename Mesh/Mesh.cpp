@@ -66,5 +66,5 @@ void Mesh::SetInitialCondidions()
         else 
             cell.W = stateR;
     }
-
+    
 }
