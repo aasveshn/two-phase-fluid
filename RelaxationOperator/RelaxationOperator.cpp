@@ -68,7 +68,7 @@ void RelaxationOperator::PressureRelaxation(Cell& cell)
     else
         x1 = C / x2;
 
-    double x;
+    double x = 0;
 
     if(dP > 0)
         x1 > 0 ? x = x1 : x = x2;
