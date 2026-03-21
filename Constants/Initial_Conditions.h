@@ -3,7 +3,7 @@
 
 const double TL0 = 470.002; //549.998
 const double PL0 = 2790000  ;
-const double a1L0 = 1e-4;
+const double a1L0 = 1e-5;
 const double ro1L0 = ro_P_T(PL0, TL0, Phase(gamma_water_vapor,
                                        P0_water_vapor,
                                        Cv_water_vapor,
@@ -26,7 +26,7 @@ const double P2L0 = PL0;
 const double TR0 = 300;
 const double PR0  = 100000;
 
-const double a1R0 = 1-1e-4;
+const double a1R0 = 1-1e-5;
 const double ro1R0 = ro_P_T(PR0, TR0, Phase(gamma_water_vapor,
                                        P0_water_vapor,
                                        Cv_water_vapor,

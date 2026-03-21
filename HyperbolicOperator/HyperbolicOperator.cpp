@@ -1,4 +1,6 @@
 #include "HyperbolicOperator.h"
+#include <omp.h> 
+
 
 HyperbolicOperator::HyperbolicOperator(Mesh& msh, const Components& comp) :phases(comp),
                                                                            muscl(msh.Cells.size()),
@@ -23,6 +25,7 @@ void HyperbolicOperator::GodunovStep(bool is_X_dir, double dt)
 
     const std::vector<StateU>& flux = is_X_dir ? rieamn.getXFlux() : rieamn.getYFlux();
 
+    #pragma omp parallel for schedule(static)
     for(int i = 0; i < N; ++i)
     {
         StateW& W = mesh.Cells[i].W;

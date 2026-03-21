@@ -1,7 +1,20 @@
 #include "RelaxationOperator.h"
+#include <omp.h> 
 
 RelaxationOperator::RelaxationOperator(Mesh& msh, const Components& comp) : mesh(msh), 
-                                                                            phases(comp){}
+                                                                            phases(comp), 
+                                                                            P_min(1000),
+                                                                            P_max(100000000),
+                                                                            P_h(50.0),
+                                                                            Tsat_curve(static_cast<int>((P_max - P_min)/P_h) + 1)
+{
+    std::cout<<"The saturation curve calculation begins... \n";
+    for(size_t i = 0; i < Tsat_curve.size(); ++i)
+        Tsat_curve[i] = SolveTemperature(P_min + P_h*i, 200);
+    std::cout<<"The saturation curve calculation is done. \n";
+    
+
+}
 
 void RelaxationOperator::VelocityRelaxation(Cell& cell)
 {
@@ -55,7 +68,7 @@ void RelaxationOperator::PressureRelaxation(Cell& cell)
     else
         x1 = C / x2;
 
-    double x;
+    double x = 0;
 
     if(dP > 0)
         x1 > 0 ? x = x1 : x = x2;
@@ -394,13 +407,15 @@ void RelaxationOperator::GibbsFreeEnergyRelaxation(Cell& cell)
             {
                 m1_res = m1_min;
                 m2_res = m2_min;
+                
             }
             else if(std::fabs(f2) < 1e-12)
             {
                 m1_res = m1_max;
                 m2_res = m2_max;
+                
             }
-             if (f1 * f2 > 0.0)
+            else if (f1 * f2 > 0.0)
             {                  
                 if(std::fabs(f1) < std::fabs(f2))
                 {
@@ -471,11 +486,11 @@ double RelaxationOperator::SolveTemperature(double P, double T0, double tol, int
 {
 
     double T = T0;
-    for(int i = 200; i < 1000; i=i+20)
+    for(int i = 200; i < 1500; i=i+10)
     {
-        if(Fdg(P, i)*Fdg(P, i + 20) < 0)
+        if(Fdg(P, i)*Fdg(P, i + 10) <= 0)
         {
-            T = i+10;
+            T = i+5;
             break;
         }
     }
@@ -497,25 +512,36 @@ double RelaxationOperator::SolveTemperature(double P, double T0, double tol, int
 }
 
 
+inline double RelaxationOperator::GetTsat(double P)
+{
+    if (P <= P_min) return Tsat_curve.front();
+    if (P >= P_max) return Tsat_curve.back();
+
+    double idx_raw = (P - P_min)*(1/P_h);
+    int idx = static_cast<int>(idx_raw);
+    double frac = idx_raw - idx;
+
+    return Tsat_curve[idx]*(1.0-frac) + Tsat_curve[idx + 1]*frac;
+}
+
+
 void RelaxationOperator::Relax()
 {
-   
+    #pragma omp parallel for schedule(dynamic)
     for(size_t i = 0; i < mesh.Cells.size(); ++i)
     {
         VelocityRelaxation(mesh.Cells[i]);
         PressureRelaxation(mesh.Cells[i]);
         //if(mesh.Cells[i].is_Interface())
           PressureTemperatureRelaxation(mesh.Cells[i]);
-          
-       //if(mesh.Cells[i].is_Interface())
-        //{
+      // if(mesh.Cells[i].is_Interface())
+       // {
            double T = T_ro_P(mesh.Cells[i].W.ro1, mesh.Cells[i].W.P1, phases.p1);
-            double Tsat = SolveTemperature(mesh.Cells[i].W.P1, T, 1e-2, 1000);
+            double Tsat = GetTsat(mesh.Cells[i].W.P1);
             if(T > Tsat + 10)
             {   
-                //std::cout<<SolveTemperature(2790000, T, 1e-2, 1000)<<" ";
                GibbsFreeEnergyRelaxation(mesh.Cells[i]);
             } 
-        //}
+       // }
     }
 }

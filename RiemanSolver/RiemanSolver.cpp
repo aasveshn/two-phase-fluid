@@ -1,4 +1,5 @@
 #include "RiemanSolver.h"
+#include <omp.h> 
 
 RiemanSolver::RiemanSolver(unsigned int N, unsigned int k): Flux_X(k+1), Flux_Y(N-k-1){};
 
@@ -19,6 +20,7 @@ void RiemanSolver::HLLC(const Mesh& mesh, const std::vector<StateW>& WL_in, cons
         k = H_idx+1;
     }
 
+    #pragma omp parallel for schedule(static)
     for(unsigned int i = interval_L; i < N; ++i)
     {
 
