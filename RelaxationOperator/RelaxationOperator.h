@@ -15,6 +15,10 @@ private:
 
     Mesh& mesh;
     const Components& phases;
+    double P_min;
+    double P_max;
+    double P_h;
+    std::vector<double> Tsat_curve;
 
 public:
 
@@ -29,7 +33,8 @@ private:
     inline double Fdg(double m1, double m2, double E);
     inline double Fdg(double P, double T);
     inline double Fdg_der(double P, double T, const Phase&p1, const Phase& p2);
-    double SolveTemperature(double P, double T0, double tol = 1e-4, int maxIter = 1000);
+    double SolveTemperature(double P, double T0, double tol = 1e-2, int maxIter = 1000);
+    inline double GetTsat(double P);
     void GibbsFreeEnergyRelaxation(Cell& cell);
 
     
