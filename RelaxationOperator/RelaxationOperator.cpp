@@ -1,4 +1,5 @@
 #include "RelaxationOperator.h"
+#include <omp.h> 
 
 RelaxationOperator::RelaxationOperator(Mesh& msh, const Components& comp) : mesh(msh), 
                                                                             phases(comp), 
@@ -526,14 +527,13 @@ inline double RelaxationOperator::GetTsat(double P)
 
 void RelaxationOperator::Relax()
 {
-   
+    #pragma omp parallel for schedule(dynamic)
     for(size_t i = 0; i < mesh.Cells.size(); ++i)
     {
         VelocityRelaxation(mesh.Cells[i]);
         PressureRelaxation(mesh.Cells[i]);
         //if(mesh.Cells[i].is_Interface())
           PressureTemperatureRelaxation(mesh.Cells[i]);
-          
       // if(mesh.Cells[i].is_Interface())
        // {
            double T = T_ro_P(mesh.Cells[i].W.ro1, mesh.Cells[i].W.P1, phases.p1);

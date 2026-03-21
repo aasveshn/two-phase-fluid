@@ -1,4 +1,5 @@
 #include "RiemanSolver.h"
+#include <omp.h> 
 
 RiemanSolver::RiemanSolver(unsigned int N, unsigned int k): Flux_X(k+1), Flux_Y(N-k-1){};
 
@@ -19,6 +20,7 @@ void RiemanSolver::HLLC(const Mesh& mesh, const std::vector<StateW>& WL_in, cons
         k = H_idx+1;
     }
 
+    #pragma omp parallel for schedule(static)
     for(unsigned int i = interval_L; i < N; ++i)
     {
 
@@ -136,15 +138,6 @@ void RiemanSolver::HLLC(const Mesh& mesh, const std::vector<StateW>& WL_in, cons
             UR_C[4] = a2R*WR.ro2*((sR-WR.u2)/(sR-s_C));
             UR_C[5] = UR_C[4]*s_C; UR_C[6] = UR_C[4]*WR.v2;
             UR_C[7] = UR_C[4]*(E(e_P_ro(WR.P2, WR.ro2, phases.p2), WR.u2, WR.v2) + (s_C-WR.u2)*(s_C + WR.P2/(WR.ro2*(sR-WR.u2))));
-
-            /*
-            if((i == 11999 || i == 12000) && is_X_dir) {  // грань между 599 и 600
-    std::cout << "sL=" << sL << " sR=" << sR << " s_C=" << s_C << "\n";
-    std::cout << "WL.u1=" << WL.u1 << " WL.ro1=" << WL.ro1 << " WL.P1=" << WL.P1 << "\n";
-    std::cout << "WR.u1=" << WR.u1 << " WR.ro1=" << WR.ro1 << " WR.P1=" << WR.P1 << "\n";
-    std::cout << "UL[0]=" << UL[0] << " UL[1]=" << UL[1] << " UL[3]=" << UL[3] << "\n";
-    std::cout << "UR[0]=" << UR[0] << " UR[1]=" << UR[1] << " UR[3]=" << UR[3] << "\n";
-}*/
 
             if(sL >= 0) {
                 flux[i-k][0] = UL[1]; 

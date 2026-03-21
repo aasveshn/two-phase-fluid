@@ -1,4 +1,5 @@
 #include "MUSCL.h"
+#include <omp.h> 
 
 MUSCL::MUSCL(int N) : B(betta), W_L(N), W_R(N){};
 
@@ -90,11 +91,11 @@ void MUSCL::MUSCL_Operator(const Mesh& mesh, bool is_X_dir, double dt, const Com
     int N = W_L.size();
 
     
-    unsigned R_id, L_id;
-    StateW d_L, d_R, slope, AWprod;
+     #pragma omp parallel for
     for(int i = 0; i < N; ++i)
     {
-        
+        unsigned R_id, L_id;
+        StateW d_L, d_R, slope, AWprod;
         if(mesh.Faces[mesh.Cells[i].faces_ID[face_dirs[0]]].type != 0)
         {
             R_id = mesh.Faces[mesh.Cells[i].faces_ID[face_dirs[1]]].Right_ID;
