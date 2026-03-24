@@ -532,7 +532,7 @@ void RelaxationOperator::Relax()
     {
         VelocityRelaxation(mesh.Cells[i]);
         PressureRelaxation(mesh.Cells[i]);
-        //if(mesh.Cells[i].is_Interface())
+       // if(mesh.Cells[i].is_Interface())
           PressureTemperatureRelaxation(mesh.Cells[i]);
       // if(mesh.Cells[i].is_Interface())
        // {
