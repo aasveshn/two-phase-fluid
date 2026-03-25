@@ -55,7 +55,7 @@ Mesh::Mesh(std::string filename)
 //Необходима реализация
 void Mesh::SetInitialCondidions()
 {
-    unsigned int discontinuity =595;
+    unsigned int discontinuity =590;
     StateW stateL(a1L0, ro1L0, u1L0, v1L0, P1L0, ro2L0, u2L0, v2L0, P2L0);
     StateW stateR(a1R0, ro1R0, u1R0, v1R0, P1R0, ro2R0, u2R0, v2R0, P2R0);
     for(
