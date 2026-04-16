@@ -23,10 +23,12 @@ private:
 public:
 
     RelaxationOperator(Mesh& msh, const Components& comp);
-    void Relax();
+    void Relax1();
+    void Relax2();
     
 private:
     void VelocityRelaxation(Cell& cell);
+    void VelocityRelaxation(Cell& cell, bool isX);
     void PressureRelaxation(Cell& cell);
     void PressureTemperatureRelaxation(Cell& cell);
     inline double SolvePressure(double m1, double m2, double E, const Phase& p1, const Phase& p2);

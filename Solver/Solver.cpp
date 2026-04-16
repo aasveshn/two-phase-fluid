@@ -81,6 +81,11 @@ void Solver::Solve()
     std::ofstream f_T1("output/T1.txt");
     std::ofstream f_T2("output/T2.txt");
 
+    //std::vector<double> output_times = {2.5e-5, 5e-5, 7.5e-5, t_end};
+    std::vector<double> output_times = {5e-6, 1e-5, 2e-5, t_end};
+    int output_index = 0;
+    double prev_time;
+
     for (const auto& cell : mesh.Cells) {
         double T1 = T_ro_P(cell.W.ro1, cell.W.P1, phases.p1);
         double T2 = T_ro_P(cell.W.ro2, cell.W.P2, phases.p2);
@@ -117,32 +122,31 @@ void Solver::Solve()
        
         if(step % 2 == 0)
         {
-            RelaxationOp.Relax();
+            RelaxationOp.Relax2();
             HyperbolicOp.HyperbolicStepX(dt*0.5);
-            RelaxationOp.Relax();
+            //RelaxationOp.Relax1();
             HyperbolicOp.HyperbolicStepY(dt);
-            RelaxationOp.Relax();
+            //RelaxationOp.Relax1();
             HyperbolicOp.HyperbolicStepX(dt*0.5);
-            RelaxationOp.Relax();
-
-        
+            RelaxationOp.Relax2();
         }
         else
         {
-            RelaxationOp.Relax();
+            RelaxationOp.Relax2();
             HyperbolicOp.HyperbolicStepY(dt*0.5);
-            RelaxationOp.Relax();
+            //RelaxationOp.Relax1();
             HyperbolicOp.HyperbolicStepX(dt);
-            RelaxationOp.Relax();
+            //RelaxationOp.Relax1();
             HyperbolicOp.HyperbolicStepY(dt*0.5);
-            RelaxationOp.Relax();
+            RelaxationOp.Relax2();
         }
-        
+        prev_time = time;
         time += dt;
 
-        
-
-
+        while (output_index < output_times.size() &&
+       prev_time < output_times[output_index] &&
+       time >= output_times[output_index])
+{
         for (const auto& cell : mesh.Cells) {
         double T1 = T_ro_P(cell.W.ro1, cell.W.P1, phases.p1);
         double T2 = T_ro_P(cell.W.ro2, cell.W.P2, phases.p2);
@@ -171,14 +175,18 @@ void Solver::Solve()
         f_T1  <<  "\n";
         f_T2   << "\n";
 
+            output_index++;
+}
+
         dt = compute_dt();
         ++step;
         std::cout<<time<<" "<<step<<"\n";
         if(time + dt > t_end)
             dt = t_end - time;
+        //if (step == 1)
+          // break;
 
-        //if( step == 100)
-          //  break;
+       
     }
 
 

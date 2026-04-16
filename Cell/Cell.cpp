@@ -21,6 +21,6 @@ Cell::Cell(const Cell& other)
 
 bool Cell::is_Interface()
 {
-  return W.a1 > 1e-3 && W.a1 < 1-1e-3;
+  return W.a1 > 0.001 && W.a1 < 1-0.001;
   return true;
 }

@@ -34,6 +34,36 @@ void RelaxationOperator::VelocityRelaxation(Cell& cell)
     cell.W.P2 = P_ro_e(cell.W.ro2, e2_new, phases.p2);
 }
 
+
+void RelaxationOperator::VelocityRelaxation(Cell& cell, bool isX)
+{
+    double UI = f_UI_x(cell.W);
+    double VI = f_UI_y(cell.W);
+    double e1_new, e2_new;
+    if(isX)
+    {    
+    e1_new = E(e_P_ro(cell.W.P1, cell.W.ro1, phases.p1), cell.W.u1, cell.W.v1) 
+                    + UI*(UI-cell.W.u1) - UI*UI*0.5 ;  
+    e2_new = E(e_P_ro(cell.W.P2, cell.W.ro2, phases.p2), cell.W.u2, cell.W.v2)
+                    + UI*(UI-cell.W.u2)  - UI*UI*0.5 ; 
+    }
+    else
+      {    
+    e1_new = E(e_P_ro(cell.W.P1, cell.W.ro1, phases.p1), cell.W.u1, cell.W.v1) 
+                     + VI*(VI-cell.W.v1)  - VI*VI*0.5;  
+    e2_new = E(e_P_ro(cell.W.P2, cell.W.ro2, phases.p2), cell.W.u2, cell.W.v2)
+                     + VI*(VI-cell.W.v2)- VI*VI*0.5; 
+    }
+   
+    
+    cell.W.u1 = UI;
+    cell.W.v1 = VI;
+    cell.W.P1 = P_ro_e(cell.W.ro1, e1_new, phases.p1);
+    cell.W.u2 = UI;
+    cell.W.v2 = VI;
+    cell.W.P2 = P_ro_e(cell.W.ro2, e2_new, phases.p2);
+}
+
 void RelaxationOperator::PressureRelaxation(Cell& cell)
 {
 
@@ -243,7 +273,7 @@ void RelaxationOperator::GibbsFreeEnergyRelaxation(Cell& cell)
 
     if(g1_0 - g2_0 > 0) // condensation
     {
-        m1 = 1e-8;
+        m1 = 1e-5;
         m2 = M - m1;
 
         double P = SolvePressure(m1, m2, E, p1, p2);
@@ -274,7 +304,7 @@ void RelaxationOperator::GibbsFreeEnergyRelaxation(Cell& cell)
         {
             double m1_res, m2_res;
 
-            double m1_min = 1e-8;
+            double m1_min = 1e-5;
             double m1_max = W.a1*W.ro1;
 
             double m2_min = M - m1_min;
@@ -362,7 +392,7 @@ void RelaxationOperator::GibbsFreeEnergyRelaxation(Cell& cell)
         return;
     else //evaporation
     {//!!!!!!!!!!!!!!!!!!!!!!!!!
-        m1 = std::min(M-1e-8, (E-M*p2.q)/(p1.q-p2.q));
+        m1 = std::min(M-1e-5, (E-M*p2.q)/(p1.q-p2.q));
         //m1 = M-1e8;
         m2 = M-m1;
 
@@ -525,23 +555,48 @@ inline double RelaxationOperator::GetTsat(double P)
 }
 
 
-void RelaxationOperator::Relax()
+void RelaxationOperator::Relax1()
 {
     #pragma omp parallel for schedule(dynamic)
     for(size_t i = 0; i < mesh.Cells.size(); ++i)
     {
         VelocityRelaxation(mesh.Cells[i]);
         PressureRelaxation(mesh.Cells[i]);
-       // if(mesh.Cells[i].is_Interface())
+        //if(mesh.Cells[i].is_Interface())
           PressureTemperatureRelaxation(mesh.Cells[i]);
-      // if(mesh.Cells[i].is_Interface())
-       // {
+          
+       //if(mesh.Cells[i].is_Interface())
+        //{
+          // double T = T_ro_P(mesh.Cells[i].W.ro1, mesh.Cells[i].W.P1, phases.p1);
+           // double Tsat = GetTsat(mesh.Cells[i].W.P1);
+           // if(T > Tsat + 10)
+          // // {   
+            //  GibbsFreeEnergyRelaxation(mesh.Cells[i]);
+            //} 
+        //}
+    }
+}
+
+
+void RelaxationOperator::Relax2()
+{
+   // std::cout<< GetTsat(mesh.Cells[0].W.P2) << " ";
+    #pragma omp parallel for schedule(dynamic)
+    for(size_t i = 0; i < mesh.Cells.size(); ++i)
+    {
+        VelocityRelaxation(mesh.Cells[i]);
+        PressureRelaxation(mesh.Cells[i]);
+        if(mesh.Cells[i].is_Interface())
+          PressureTemperatureRelaxation(mesh.Cells[i]);
+          
+       if(mesh.Cells[i].is_Interface())
+       {
            double T = T_ro_P(mesh.Cells[i].W.ro1, mesh.Cells[i].W.P1, phases.p1);
             double Tsat = GetTsat(mesh.Cells[i].W.P1);
-            if(T > Tsat + 10)
+            if(T > Tsat)
             {   
                GibbsFreeEnergyRelaxation(mesh.Cells[i]);
             } 
-       // }
+       }
     }
 }
