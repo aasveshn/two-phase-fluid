@@ -80,6 +80,8 @@ void Solver::Solve()
     std::ofstream f_P2("output/P2.txt");
     std::ofstream f_T1("output/T1.txt");
     std::ofstream f_T2("output/T2.txt");
+    std::ofstream f_C1("output/C1.txt");
+    std::ofstream f_C2("output/C2.txt");
 
     //std::vector<double> output_times = {2.5e-5, 5e-5, 7.5e-5, t_end};
     std::vector<double> output_times = {5e-6, 1e-5, 2e-5, t_end};
@@ -89,6 +91,8 @@ void Solver::Solve()
     for (const auto& cell : mesh.Cells) {
         double T1 = T_ro_P(cell.W.ro1, cell.W.P1, phases.p1);
         double T2 = T_ro_P(cell.W.ro2, cell.W.P2, phases.p2);
+        double C1 = f_C(cell.W.P1, cell.W.ro1, phases.p1);
+        double C2 = f_C(cell.W.P2, cell.W.ro2, phases.p2);
         f_a1  << cell.W.a1  << " ";
         f_ro1 << cell.W.ro1 << " ";
         f_u1  << cell.W.u1  << " ";
@@ -100,6 +104,8 @@ void Solver::Solve()
         f_P2  << cell.W.P2  << " ";
         f_T1 << T1 <<" ";
         f_T2 << T2 <<" ";
+        f_C1 << C1 <<" ";
+        f_C2 << C2 <<" ";
     }
 
     f_a1  <<  "\n";
@@ -111,6 +117,10 @@ void Solver::Solve()
         f_u2  <<  "\n";
         f_v2  <<  "\n";
         f_P2   << "\n";
+        f_T1 <<" \n";
+        f_T2 <<" \n";
+        f_C1 <<" \n";
+        f_C2 <<" \n";
 
      if (!f_a1.is_open()) {
         std::cerr << "Error opening output files!" << std::endl;
@@ -150,6 +160,8 @@ void Solver::Solve()
         for (const auto& cell : mesh.Cells) {
         double T1 = T_ro_P(cell.W.ro1, cell.W.P1, phases.p1);
         double T2 = T_ro_P(cell.W.ro2, cell.W.P2, phases.p2);
+          double C1 = f_C(cell.W.P1, cell.W.ro1, phases.p1);
+        double C2 = f_C(cell.W.P2, cell.W.ro2, phases.p2);
         f_a1  << cell.W.a1  << " ";
         f_ro1 << cell.W.ro1 << " ";
         f_u1  << cell.W.u1  << " ";
@@ -161,6 +173,8 @@ void Solver::Solve()
         f_P2  << cell.W.P2  << " ";
         f_T1 << T1 <<" ";
         f_T2 << T2 <<" ";
+         f_C1 << C1 <<" ";
+        f_C2 <<C2 <<" ";
     }
 
     f_a1  <<  "\n";
@@ -174,6 +188,8 @@ void Solver::Solve()
         f_P2   << "\n";
         f_T1  <<  "\n";
         f_T2   << "\n";
+        f_C1 <<" \n";
+        f_C2 <<" \n";
 
             output_index++;
 }
@@ -195,6 +211,8 @@ void Solver::Solve()
 
     f_a1.close(); f_ro1.close(); f_u1.close(); f_v1.close(); f_P1.close();
     f_ro2.close(); f_u2.close(); f_v2.close(); f_P2.close(); f_T1.close(); f_T2.close();
+    f_C1.close(); f_C2.close();
+
 }
 
 const Components& Solver::getPhases()
